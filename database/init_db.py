@@ -21,12 +21,16 @@ def buat_tabel():
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS pengguna (
         id_pengguna INTEGER PRIMARY KEY AUTOINCREMENT,
+    
         nama_lengkap TEXT NOT NULL,
         username TEXT NOT NULL UNIQUE,
         email TEXT NOT NULL UNIQUE,
-        password TEXT NOT NULL,
+    
+        password_hash TEXT NOT NULL,
+    
         role TEXT NOT NULL DEFAULT 'user',
         status_akun TEXT NOT NULL DEFAULT 'aktif',
+    
         tanggal_daftar TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
     """)
@@ -53,8 +57,17 @@ def buat_tabel():
     CREATE TABLE IF NOT EXISTS data_pasien (
         id_pasien INTEGER PRIMARY KEY AUTOINCREMENT,
         id_dataset INTEGER NOT NULL,
+    
         no_rekam_medis TEXT NOT NULL,
-
+    
+        jenis_kelamin_asli TEXT,
+        lama_rawat_asli TEXT,
+        kelas_rawat_asli TEXT,
+        usia_asli TEXT,
+        cara_keluar_asli TEXT,
+        ruang_rawat_asli TEXT,
+        diagnosa_utama_asli TEXT,
+    
         jenis_kelamin INTEGER,
         lama_rawat INTEGER,
         kelas_rawat INTEGER,
@@ -62,9 +75,10 @@ def buat_tabel():
         cara_keluar INTEGER,
         ruang_rawat INTEGER,
         diagnosa_utama INTEGER,
-
+    
         FOREIGN KEY (id_dataset)
             REFERENCES dataset(id_dataset)
+            ON DELETE CASCADE
     )
     """)
 
@@ -72,18 +86,22 @@ def buat_tabel():
     # HASIL KMEANS
     # =========================
     cursor.execute("""
-    CREATE TABLE IF NOT EXISTS hasil_kmeans (
-        id_hasil_kmeans INTEGER PRIMARY KEY AUTOINCREMENT,
-        id_pengguna INTEGER NOT NULL,
-        id_dataset INTEGER NOT NULL,
-        jumlah_cluster INTEGER NOT NULL,
-        tanggal_proses TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-        FOREIGN KEY (id_pengguna)
-            REFERENCES pengguna(id_pengguna),
-
-        FOREIGN KEY (id_dataset)
-            REFERENCES dataset(id_dataset)
+    CREATE TABLE IF NOT EXISTS detail_kmeans (
+        id_detail INTEGER PRIMARY KEY AUTOINCREMENT,
+    
+        id_hasil_kmeans INTEGER NOT NULL,
+        id_pasien INTEGER NOT NULL,
+    
+        cluster INTEGER NOT NULL,
+        label_cluster TEXT NOT NULL,
+    
+        FOREIGN KEY (id_hasil_kmeans)
+            REFERENCES hasil_kmeans(id_hasil_kmeans)
+            ON DELETE CASCADE,
+    
+        FOREIGN KEY (id_pasien)
+            REFERENCES data_pasien(id_pasien)
+            ON DELETE CASCADE
     )
     """)
 
@@ -107,26 +125,21 @@ def buat_tabel():
     # HASIL NAIVE BAYES
     # =========================
     cursor.execute("""
-    CREATE TABLE IF NOT EXISTS hasil_naive_bayes (
-        id_hasil_nb INTEGER PRIMARY KEY AUTOINCREMENT,
-        id_pengguna INTEGER NOT NULL,
-        id_dataset INTEGER NOT NULL,
-
-        akurasi REAL,
-        presisi REAL,
-        recall REAL,
-        f1_score REAL,
-
-        rasio_training INTEGER,
-        rasio_testing INTEGER,
-
-        tanggal_proses TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-        FOREIGN KEY (id_pengguna)
-            REFERENCES pengguna(id_pengguna),
-
-        FOREIGN KEY (id_dataset)
-            REFERENCES dataset(id_dataset)
+    CREATE TABLE IF NOT EXISTS detail_naive_bayes (
+        id_detail_nb INTEGER PRIMARY KEY AUTOINCREMENT,
+    
+        id_hasil_nb INTEGER NOT NULL,
+        id_pasien INTEGER NOT NULL,
+    
+        hasil_prediksi TEXT NOT NULL,
+    
+        FOREIGN KEY (id_hasil_nb)
+            REFERENCES hasil_naive_bayes(id_hasil_nb)
+            ON DELETE CASCADE,
+    
+        FOREIGN KEY (id_pasien)
+            REFERENCES data_pasien(id_pasien)
+            ON DELETE CASCADE
     )
     """)
 
@@ -151,9 +164,12 @@ def buat_tabel():
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS bobot_atribut (
         id_bobot INTEGER PRIMARY KEY AUTOINCREMENT,
+    
         atribut TEXT NOT NULL,
         kategori TEXT NOT NULL,
-        bobot INTEGER NOT NULL
+        bobot INTEGER NOT NULL,
+    
+        UNIQUE(atribut, kategori)
     )
     """)
 
@@ -197,7 +213,7 @@ def buat_admin_default():
             nama_lengkap,
             username,
             email,
-            password,
+            password_hash,
             role,
             status_akun
         )
