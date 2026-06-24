@@ -118,41 +118,7 @@ def show():
     
         st.divider()
     
-        st.page_link(
-            "app.py",
-            label="Dashboard",
-            icon="📊"
-        )
-    
-        # st.page_link(
-        #     "pages/dataset.py",
-        #     label="Dataset Saya",
-        #     icon="📁"
-        # )
-    
-        # st.page_link(
-        #     "pages/kmeans.py",
-        #     label="K-Means",
-        #     icon="📈"
-        # )
-    
-        # st.page_link(
-        #     "pages/naive_bayes.py",
-        #     label="Naive Bayes",
-        #     icon="🧠"
-        # )
-    
-        # st.page_link(
-        #     "pages/riwayat.py",
-        #     label="Riwayat",
-        #     icon="📜"
-        # )
-    
-        # st.page_link(
-        #     "pages/profil.py",
-        #     label="Profil",
-        #     icon="⚙️"
-        # )
+        st.info("Menu akan aktif setelah halaman dibuat.")
     
         st.divider()
     
@@ -160,9 +126,7 @@ def show():
             "🚪 Logout",
             use_container_width=True
         ):
-    
             logout()
-    
             st.rerun()
 
 
