@@ -101,21 +101,7 @@ def show():
         "role"
     ]
 
-    col1, col2 = st.columns([8, 2])
-
-    with col2:
     
-        if st.button(
-            "🚪 Logout",
-            use_container_width=True
-        ):
-    
-            for key in list(
-                st.session_state.keys()
-            ):
-                del st.session_state[key]
-    
-            st.rerun()
     
     st.title(
         "📊 Dashboard"
