@@ -261,9 +261,24 @@ def show():
 
         if berhasil:
 
-            st.success(
-                pesan
-            )
+            st.success(pesan)
+        
+            conn = get_connection()
+            cursor = conn.cursor()
+        
+            cursor.execute("""
+            SELECT username,email
+            FROM pengguna
+            ORDER BY id_pengguna DESC
+            LIMIT 5
+            """)
+        
+            data = cursor.fetchall()
+        
+            st.write("5 User Terakhir:")
+            st.write([dict(row) for row in data])
+        
+            conn.close()
 
         else:
 
