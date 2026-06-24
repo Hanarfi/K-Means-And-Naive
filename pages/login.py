@@ -101,7 +101,7 @@ def show():
     st.divider()
 
     if st.button("Belum punya akun? Daftar"):
-        st.session_state["halaman"] = "register"
+        st.session_state["pages"] = "register"
         st.rerun()
 
     st.title(
