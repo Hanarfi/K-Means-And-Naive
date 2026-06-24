@@ -3,7 +3,10 @@
 import streamlit as st
 
 from database.koneksi import get_connection
-from models.auth import cek_login
+from models.auth import (
+    cek_login,
+    logout
+)
 
 
 # ==========================================
@@ -101,7 +104,28 @@ def show():
         "role"
     ]
 
-    
+# ==========================================
+# SIDEBAR
+# ==========================================
+
+with st.sidebar:
+
+    st.title("👤 Pengguna")
+
+    st.write(f"**{nama}**")
+
+    st.write(f"Role : {role}")
+
+    st.divider()
+
+    if st.button(
+        "🚪 Logout",
+        use_container_width=True
+    ):
+
+        logout()
+
+        st.rerun()
     
     st.title(
         "📊 Dashboard"
