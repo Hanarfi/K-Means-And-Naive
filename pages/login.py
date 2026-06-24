@@ -102,6 +102,7 @@ def show():
 
     if st.button("Belum punya akun? Daftar"):
         st.session_state["halaman"] = "register"
+        st.rerun()
 
     st.title(
         "🔐 Login Sistem"
