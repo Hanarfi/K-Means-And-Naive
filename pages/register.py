@@ -57,6 +57,13 @@ def register_user(
 
     conn = get_connection()
 
+    from database.koneksi import DB_PATH
+
+    print("=" * 50)
+    print("DATABASE DIGUNAKAN:")
+    print(DB_PATH)
+    print("=" * 50)
+
     cursor = conn.cursor()
 
     # Cek username
@@ -103,6 +110,12 @@ def register_user(
         password
     )
 
+    print("DATA YANG AKAN DISIMPAN:")
+    print("Nama :", nama_lengkap)
+    print("Username :", username)
+    print("Email :", email)
+    print("Role : user")
+
     cursor.execute(
         """
         INSERT INTO pengguna
@@ -127,6 +140,15 @@ def register_user(
     )
 
     conn.commit()
+    print("COMMIT BERHASIL")
+    cursor.execute("""
+    SELECT COUNT(*)
+    FROM pengguna
+    """)
+    
+    total = cursor.fetchone()[0]
+    
+    print("TOTAL USER:", total)
     conn.close()
 
     return (
