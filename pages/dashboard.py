@@ -109,12 +109,50 @@ def show():
     # ==========================================
     
     with st.sidebar:
+
+        st.title("🏥 Sistem K-Means & Naive Bayes")
     
-        st.title("👤 Pengguna")
-    
-        st.write(f"**{nama}**")
+        st.write(f"👤 {nama}")
     
         st.write(f"Role : {role}")
+    
+        st.divider()
+    
+        st.page_link(
+            "app.py",
+            label="Dashboard",
+            icon="📊"
+        )
+    
+        st.page_link(
+            "pages/dataset.py",
+            label="Dataset Saya",
+            icon="📁"
+        )
+    
+        st.page_link(
+            "pages/kmeans.py",
+            label="K-Means",
+            icon="📈"
+        )
+    
+        st.page_link(
+            "pages/naive_bayes.py",
+            label="Naive Bayes",
+            icon="🧠"
+        )
+    
+        st.page_link(
+            "pages/riwayat.py",
+            label="Riwayat",
+            icon="📜"
+        )
+    
+        st.page_link(
+            "pages/profil.py",
+            label="Profil",
+            icon="⚙️"
+        )
     
         st.divider()
     
@@ -128,7 +166,6 @@ def show():
             st.rerun()
 
 
-    
     st.title(
         "📊 Dashboard"
     )
