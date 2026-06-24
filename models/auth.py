@@ -18,3 +18,10 @@ def cek_admin():
             "role"
         ) == "admin"
     )
+
+def logout():
+
+    for key in list(
+        st.session_state.keys()
+    ):
+        del st.session_state[key]
