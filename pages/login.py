@@ -98,6 +98,11 @@ def logout():
 
 def show():
 
+    st.divider()
+
+    if st.button("Belum punya akun? Daftar"):
+        st.session_state["halaman"] = "register"
+
     st.title(
         "🔐 Login Sistem"
     )
