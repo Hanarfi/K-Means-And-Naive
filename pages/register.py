@@ -1,5 +1,5 @@
 # pages/register.py
-
+import re
 import streamlit as st
 import hashlib
 
@@ -14,6 +14,34 @@ def hash_password(password):
     return hashlib.sha256(
         password.encode()
     ).hexdigest()
+
+def validasi_password(password):
+    """
+    Validasi kekuatan password
+    """
+
+    if len(password) < 8:
+        return (
+            False,
+            "Password minimal 8 karakter."
+        )
+
+    if not re.search(r"[A-Z]", password):
+        return (
+            False,
+            "Password harus mengandung minimal 1 huruf besar."
+        )
+
+    if not re.search(r"\d", password):
+        return (
+            False,
+            "Password harus mengandung minimal 1 angka."
+        )
+
+    return (
+        True,
+        "Valid"
+    )
 
 
 # ==========================================
@@ -192,7 +220,16 @@ def show():
             )
 
             return
+        valid, pesan = validasi_password(
+            password
+        )
 
+        if not valid:
+            st.error(
+                pesan
+            )
+            return
+   
         berhasil, pesan = register_user(
             nama_lengkap,
             username,
