@@ -21,7 +21,7 @@ def hash_password(password):
 # CEK LOGIN
 # ==========================================
 
-def login_user(username, password):
+def login_user(username_email, password):
 
     conn = get_connection()
 
@@ -34,11 +34,15 @@ def login_user(username, password):
     cursor.execute("""
         SELECT *
         FROM pengguna
-        WHERE username = ?
+        WHERE (
+            username = ?
+            OR email = ?
+        )
         AND password_hash = ?
         AND status_akun = 'aktif'
     """, (
-        username,
+        username_email,
+        username_email,
         password_hash
     ))
 
@@ -105,7 +109,7 @@ def show():
     with st.form("form_login"):
 
         username = st.text_input(
-            "Username"
+            "Username atau Email"
         )
 
         password = st.text_input(
@@ -119,10 +123,10 @@ def show():
 
     if submit:
 
-        if not username:
+        if not username_email:
 
             st.error(
-                "Username wajib diisi."
+                "Username atau Email wajib diisi.."
             )
 
             return
@@ -136,7 +140,7 @@ def show():
             return
 
         user = login_user(
-            username,
+            username_email,
             password
         )
 
