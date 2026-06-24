@@ -104,28 +104,30 @@ def show():
         "role"
     ]
 
-# ==========================================
-# SIDEBAR
-# ==========================================
+    # ==========================================
+    # SIDEBAR
+    # ==========================================
+    
+    with st.sidebar:
+    
+        st.title("👤 Pengguna")
+    
+        st.write(f"**{nama}**")
+    
+        st.write(f"Role : {role}")
+    
+        st.divider()
+    
+        if st.button(
+            "🚪 Logout",
+            use_container_width=True
+        ):
+    
+            logout()
+    
+            st.rerun()
 
-with st.sidebar:
 
-    st.title("👤 Pengguna")
-
-    st.write(f"**{nama}**")
-
-    st.write(f"Role : {role}")
-
-    st.divider()
-
-    if st.button(
-        "🚪 Logout",
-        use_container_width=True
-    ):
-
-        logout()
-
-        st.rerun()
     
     st.title(
         "📊 Dashboard"
