@@ -124,35 +124,35 @@ def show():
             icon="📊"
         )
     
-        st.page_link(
-            "pages/dataset.py",
-            label="Dataset Saya",
-            icon="📁"
-        )
+        # st.page_link(
+        #     "pages/dataset.py",
+        #     label="Dataset Saya",
+        #     icon="📁"
+        # )
     
-        st.page_link(
-            "pages/kmeans.py",
-            label="K-Means",
-            icon="📈"
-        )
+        # st.page_link(
+        #     "pages/kmeans.py",
+        #     label="K-Means",
+        #     icon="📈"
+        # )
     
-        st.page_link(
-            "pages/naive_bayes.py",
-            label="Naive Bayes",
-            icon="🧠"
-        )
+        # st.page_link(
+        #     "pages/naive_bayes.py",
+        #     label="Naive Bayes",
+        #     icon="🧠"
+        # )
     
-        st.page_link(
-            "pages/riwayat.py",
-            label="Riwayat",
-            icon="📜"
-        )
+        # st.page_link(
+        #     "pages/riwayat.py",
+        #     label="Riwayat",
+        #     icon="📜"
+        # )
     
-        st.page_link(
-            "pages/profil.py",
-            label="Profil",
-            icon="⚙️"
-        )
+        # st.page_link(
+        #     "pages/profil.py",
+        #     label="Profil",
+        #     icon="⚙️"
+        # )
     
         st.divider()
     
