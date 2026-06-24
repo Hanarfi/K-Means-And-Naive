@@ -108,7 +108,7 @@ def show():
 
     with st.form("form_login"):
 
-        username = st.text_input(
+        username_email = st.text_input(
             "Username atau Email"
         )
 
