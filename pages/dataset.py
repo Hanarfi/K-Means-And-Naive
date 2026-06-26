@@ -4,9 +4,56 @@ import pandas as pd
 from models.auth import login_required
 
 
+# ==========================================
+# KOLOM WAJIB
+# ==========================================
+
+KOLOM_WAJIB = [
+
+    "No. Rekam Medis",
+
+    "JK",
+
+    "TGL MSK",
+
+    "TGL KELUAR",
+
+    "LD",
+
+    "Kelas Rawatan",
+
+    "Usia",
+
+    "Cara Keluar",
+
+    "Ruang Rawat",
+
+    "Diagnosa Utama"
+
+]
+
 
 # ==========================================
-# PREVIEW DATASET
+# VALIDASI KOLOM
+# ==========================================
+
+def validasi_kolom(df):
+
+    kolom_file = list(df.columns)
+
+    kolom_tidak_ada = []
+
+    for kolom in KOLOM_WAJIB:
+
+        if kolom not in kolom_file:
+
+            kolom_tidak_ada.append(kolom)
+
+    return kolom_tidak_ada
+
+
+# ==========================================
+# PREVIEW
 # ==========================================
 
 def preview_dataset(df):
@@ -34,7 +81,7 @@ def show():
     st.title("📂 Dataset Saya")
 
     st.write(
-        "Upload dataset pasien untuk proses analisis."
+        "Upload dataset pasien rawat inap."
     )
 
     st.divider()
@@ -49,20 +96,24 @@ def show():
 
     file = st.file_uploader(
 
-        "Upload File Excel",
+        "Upload Dataset Excel",
 
         type=[
             "xlsx",
             "xls"
         ]
+
     )
 
     if st.button(
-        "Upload Dataset",
+
+        "Preview Dataset",
+
         use_container_width=True
+
     ):
 
-        if not nama_dataset:
+        if nama_dataset == "":
 
             st.error(
                 "Nama dataset wajib diisi."
@@ -73,23 +124,39 @@ def show():
         if file is None:
 
             st.error(
-                "Silakan pilih file Excel."
+                "Silakan pilih file."
             )
 
             return
 
         try:
 
-            df = pd.read_excel(
-                file
-            )
-
-            st.success(
-                "Dataset berhasil dibaca."
-            )
-
-            preview_dataset(df)
+            df = pd.read_excel(file)
 
         except Exception as e:
 
             st.error(e)
+
+            return
+
+        kolom_error = validasi_kolom(df)
+
+        if len(kolom_error) > 0:
+
+            st.error(
+                "Kolom berikut tidak ditemukan:"
+            )
+
+            for kolom in kolom_error:
+
+                st.write(
+                    f"- {kolom}"
+                )
+
+            return
+
+        st.success(
+            "Struktur dataset valid."
+        )
+
+        preview_dataset(df)
