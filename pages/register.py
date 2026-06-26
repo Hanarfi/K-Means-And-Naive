@@ -1,7 +1,6 @@
-# pages/register.py
 import re
-import streamlit as st
 import hashlib
+import streamlit as st
 
 from database.koneksi import get_connection
 
@@ -11,31 +10,37 @@ from database.koneksi import get_connection
 # ==========================================
 
 def hash_password(password):
+
     return hashlib.sha256(
         password.encode()
     ).hexdigest()
 
+
+# ==========================================
+# VALIDASI PASSWORD
+# ==========================================
+
 def validasi_password(password):
-    """
-    Validasi kekuatan password
-    """
 
     if len(password) < 8:
+
         return (
             False,
             "Password minimal 8 karakter."
         )
 
     if not re.search(r"[A-Z]", password):
+
         return (
             False,
-            "Password harus mengandung minimal 1 huruf besar."
+            "Password harus memiliki minimal 1 huruf besar."
         )
 
     if not re.search(r"\d", password):
+
         return (
             False,
-            "Password harus mengandung minimal 1 angka."
+            "Password harus memiliki minimal 1 angka."
         )
 
     return (
@@ -45,32 +50,46 @@ def validasi_password(password):
 
 
 # ==========================================
-# SIMPAN USER BARU
+# VALIDASI EMAIL
+# ==========================================
+
+def validasi_email(email):
+
+    pola = r'^[\w\.-]+@[\w\.-]+\.\w+$'
+
+    return re.match(
+        pola,
+        email
+    ) is not None
+
+
+# ==========================================
+# REGISTER USER
 # ==========================================
 
 def register_user(
+
     nama_lengkap,
+
     username,
+
     email,
+
     password
+
 ):
 
     conn = get_connection()
 
-    from database.koneksi import DB_PATH
-
-    print("=" * 50)
-    print("DATABASE DIGUNAKAN:")
-    print(DB_PATH)
-    print("=" * 50)
-
     cursor = conn.cursor()
 
-    # Cek username
+    # ===============================
+    # CEK USERNAME
+    # ===============================
 
     cursor.execute(
         """
-        SELECT *
+        SELECT id_pengguna
         FROM pengguna
         WHERE username = ?
         """,
@@ -86,11 +105,13 @@ def register_user(
             "Username sudah digunakan."
         )
 
-    # Cek email
+    # ===============================
+    # CEK EMAIL
+    # ===============================
 
     cursor.execute(
         """
-        SELECT *
+        SELECT id_pengguna
         FROM pengguna
         WHERE email = ?
         """,
@@ -106,49 +127,54 @@ def register_user(
             "Email sudah digunakan."
         )
 
+    # ===============================
+    # INSERT USER
+    # ===============================
+
     password_hash = hash_password(
         password
     )
-
-    print("DATA YANG AKAN DISIMPAN:")
-    print("Nama :", nama_lengkap)
-    print("Username :", username)
-    print("Email :", email)
-    print("Role : user")
 
     cursor.execute(
         """
         INSERT INTO pengguna
         (
+
             nama_lengkap,
+
             username,
+
             email,
+
             password_hash,
+
             role,
+
             status_akun
+
         )
+
         VALUES (?, ?, ?, ?, ?, ?)
         """,
         (
+
             nama_lengkap,
+
             username,
+
             email,
+
             password_hash,
+
             "user",
+
             "aktif"
+
         )
     )
 
     conn.commit()
-    print("COMMIT BERHASIL")
-    cursor.execute("""
-    SELECT COUNT(*)
-    FROM pengguna
-    """)
-    
-    total = cursor.fetchone()[0]
-    
-    print("TOTAL USER:", total)
+
     conn.close()
 
     return (
@@ -198,8 +224,25 @@ def show():
         )
 
         submit = st.form_submit_button(
-            "Daftar"
+            "Daftar",
+            use_container_width=True
         )
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+
+        if st.button(
+            "Sudah punya akun?"
+        ):
+
+            st.session_state[
+                "auth_page"
+            ] = "login"
+
+            st.rerun()
+
+    # ======================================
 
     if submit:
 
@@ -227,6 +270,16 @@ def show():
 
             return
 
+        if not validasi_email(
+            email
+        ):
+
+            st.error(
+                "Format email tidak valid."
+            )
+
+            return
+
         if not password:
 
             st.error(
@@ -242,50 +295,45 @@ def show():
             )
 
             return
+
         valid, pesan = validasi_password(
             password
         )
 
         if not valid:
+
             st.error(
                 pesan
             )
+
             return
-   
+
         berhasil, pesan = register_user(
+
             nama_lengkap,
+
             username,
+
             email,
+
             password
+
         )
 
         if berhasil:
 
-            st.success(pesan)
-        
-            conn = get_connection()
-            cursor = conn.cursor()
-        
-            cursor.execute("""
-            SELECT username,email
-            FROM pengguna
-            ORDER BY id_pengguna DESC
-            LIMIT 5
-            """)
-        
-            data = cursor.fetchall()
-        
-            st.write("5 User Terakhir:")
-            st.write([dict(row) for row in data])
-        
-            conn.close()
+            st.success(
+                pesan
+            )
+
+            st.session_state[
+                "auth_page"
+            ] = "login"
+
+            st.rerun()
 
         else:
 
             st.error(
                 pesan
             )
-
-
-if __name__ == "__main__":
-    show()
