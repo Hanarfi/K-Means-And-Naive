@@ -1,31 +1,35 @@
-# pages/dashboard.py
-
 import streamlit as st
 
 from database.koneksi import get_connection
-from models.auth import (
-    cek_login,
-    logout
-)
 
 
 # ==========================================
-# HITUNG DATASET USER
+# TOTAL DATASET
 # ==========================================
 
-def total_dataset_user(id_pengguna):
+def total_dataset(id_pengguna):
 
     conn = get_connection()
 
     cursor = conn.cursor()
 
-    cursor.execute("""
-        SELECT COUNT(*)
-        FROM dataset
-        WHERE id_pengguna = ?
-    """, (id_pengguna,))
+    try:
 
-    total = cursor.fetchone()[0]
+        cursor.execute("""
+
+            SELECT COUNT(*)
+
+            FROM dataset
+
+            WHERE id_pengguna = ?
+
+        """, (id_pengguna,))
+
+        total = cursor.fetchone()[0]
+
+    except:
+
+        total = 0
 
     conn.close()
 
@@ -33,22 +37,32 @@ def total_dataset_user(id_pengguna):
 
 
 # ==========================================
-# TOTAL KMEANS USER
+# TOTAL KMEANS
 # ==========================================
 
-def total_kmeans_user(id_pengguna):
+def total_kmeans(id_pengguna):
 
     conn = get_connection()
 
     cursor = conn.cursor()
 
-    cursor.execute("""
-        SELECT COUNT(*)
-        FROM hasil_kmeans
-        WHERE id_pengguna = ?
-    """, (id_pengguna,))
+    try:
 
-    total = cursor.fetchone()[0]
+        cursor.execute("""
+
+            SELECT COUNT(*)
+
+            FROM hasil_kmeans
+
+            WHERE id_pengguna = ?
+
+        """, (id_pengguna,))
+
+        total = cursor.fetchone()[0]
+
+    except:
+
+        total = 0
 
     conn.close()
 
@@ -56,22 +70,65 @@ def total_kmeans_user(id_pengguna):
 
 
 # ==========================================
-# TOTAL NAIVE BAYES USER
+# TOTAL NAIVE BAYES
 # ==========================================
 
-def total_nb_user(id_pengguna):
+def total_naive_bayes(id_pengguna):
 
     conn = get_connection()
 
     cursor = conn.cursor()
 
-    cursor.execute("""
-        SELECT COUNT(*)
-        FROM hasil_naive_bayes
-        WHERE id_pengguna = ?
-    """, (id_pengguna,))
+    try:
 
-    total = cursor.fetchone()[0]
+        cursor.execute("""
+
+            SELECT COUNT(*)
+
+            FROM hasil_naive_bayes
+
+            WHERE id_pengguna = ?
+
+        """, (id_pengguna,))
+
+        total = cursor.fetchone()[0]
+
+    except:
+
+        total = 0
+
+    conn.close()
+
+    return total
+
+
+# ==========================================
+# TOTAL RIWAYAT
+# ==========================================
+
+def total_riwayat(id_pengguna):
+
+    conn = get_connection()
+
+    cursor = conn.cursor()
+
+    try:
+
+        cursor.execute("""
+
+            SELECT COUNT(*)
+
+            FROM riwayat_analisis
+
+            WHERE id_pengguna = ?
+
+        """, (id_pengguna,))
+
+        total = cursor.fetchone()[0]
+
+    except:
+
+        total = 0
 
     conn.close()
 
@@ -84,145 +141,102 @@ def total_nb_user(id_pengguna):
 
 def show():
 
-    if not cek_login():
+    nama = st.session_state["nama_lengkap"]
 
-        st.warning(
-            "Silakan login terlebih dahulu."
-        )
+    id_pengguna = st.session_state["id_pengguna"]
 
-        st.stop()
-
-    nama = st.session_state[
-        "nama_lengkap"
-    ]
-
-    id_pengguna = st.session_state[
-        "id_pengguna"
-    ]
-
-    role = st.session_state[
-        "role"
-    ]
-
-    # ==========================================
-    # SIDEBAR
-    # ==========================================
-    
-    with st.sidebar:
-
-        st.title("🏥 Sistem K-Means & Naive Bayes")
-    
-        st.write(f"👤 {nama}")
-    
-        st.write(f"Role : {role}")
-    
-        st.divider()
-    
-        st.info("Menu akan aktif setelah halaman dibuat.")
-    
-        st.divider()
-
-        if st.button(
-            "📂 Dataset Saya",
-            use_container_width=True
-        ):
-        
-            st.session_state["menu"] = "dataset"
-        
-            st.rerun()
-    
-        if st.button(
-            "🚪 Logout",
-            use_container_width=True
-        ):
-            logout()
-            st.rerun()
-
-
-    st.title(
-        "📊 Dashboard"
-    )
+    st.title("🏥 Dashboard")
 
     st.write(
-        f"Selamat datang, **{nama}**"
+
+        f"Selamat datang **{nama}**"
+
     )
 
-    dataset = total_dataset_user(
-        id_pengguna
+    st.caption(
+
+        "Sistem K-Means Clustering dan Naive Bayes"
+
     )
 
-    kmeans = total_kmeans_user(
-        id_pengguna
-    )
+    st.divider()
 
-    nb = total_nb_user(
-        id_pengguna
-    )
+    dataset = total_dataset(id_pengguna)
 
-    col1, col2, col3 = st.columns(3)
+    kmeans = total_kmeans(id_pengguna)
+
+    nb = total_naive_bayes(id_pengguna)
+
+    riwayat = total_riwayat(id_pengguna)
+
+    col1, col2, col3, col4 = st.columns(4)
 
     with col1:
+
         st.metric(
-            "Dataset Saya",
+
+            "Dataset",
+
             dataset
+
         )
 
     with col2:
+
         st.metric(
-            "Analisis K-Means",
+
+            "K-Means",
+
             kmeans
+
         )
 
     with col3:
+
         st.metric(
-            "Analisis Naive Bayes",
+
+            "Naive Bayes",
+
             nb
+
+        )
+
+    with col4:
+
+        st.metric(
+
+            "Riwayat",
+
+            riwayat
+
         )
 
     st.divider()
 
-    st.subheader(
-        "Menu Cepat"
+    st.subheader("Informasi Sistem")
+
+    st.info(
+
+        f"""
+
+Versi Sistem : 1.0
+
+Role : {st.session_state['role'].title()}
+
+Database : SQLite
+
+Status : Aktif
+
+        """
+
     )
-
-    col1, col2, col3 = st.columns(3)
-
-    with col1:
-
-        if st.button(
-            "📁 Upload Dataset",
-            use_container_width=True
-        ):
-            st.switch_page(
-                "pages/dataset.py"
-            )
-
-    with col2:
-
-        if st.button(
-            "📈 K-Means",
-            use_container_width=True
-        ):
-            st.switch_page(
-                "pages/kmeans.py"
-            )
-
-    with col3:
-
-        if st.button(
-            "🧠 Naive Bayes",
-            use_container_width=True
-        ):
-            st.switch_page(
-                "pages/naive_bayes.py"
-            )
 
     st.divider()
 
-    st.subheader(
-        "Informasi Akun"
-    )
+    st.subheader("Aktivitas")
 
     st.write(
-        f"Role : {role}"
+
+        "Belum ada aktivitas yang ditampilkan."
+
     )
