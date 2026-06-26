@@ -246,7 +246,6 @@ def delete(query, params=()):
     return jumlah
 
 
-from database.koneksi import get_connection
 
 
 # ==========================================
@@ -438,3 +437,186 @@ def simpan_data_bobot(id_dataset, dataframe):
         conn.close()
 
 
+# ==========================================
+# AMBIL DATASET USER
+# ==========================================
+
+def ambil_dataset_user(id_pengguna):
+
+    return fetch_all(
+        """
+        SELECT *
+
+        FROM dataset
+
+        WHERE id_pengguna = ?
+
+        ORDER BY id_dataset DESC
+        """,
+        (id_pengguna,)
+    )
+
+
+# ==========================================
+# AMBIL SEMUA DATASET
+# ==========================================
+
+def ambil_semua_dataset():
+
+    return fetch_all(
+        """
+        SELECT *
+
+        FROM dataset
+
+        ORDER BY id_dataset DESC
+        """
+    )
+
+
+# ==========================================
+# AMBIL SEMUA DATASET
+# ==========================================
+
+def ambil_semua_dataset():
+
+    return fetch_all(
+        """
+        SELECT *
+
+        FROM dataset
+
+        ORDER BY id_dataset DESC
+        """
+    )
+
+
+# ==========================================
+# DETAIL DATASET
+# ==========================================
+
+def ambil_dataset(id_dataset):
+
+    return fetch_one(
+        """
+        SELECT *
+
+        FROM dataset
+
+        WHERE id_dataset = ?
+        """,
+        (id_dataset,)
+    )
+
+
+# ==========================================
+# DATA PASIEN
+# ==========================================
+
+def ambil_data_pasien(id_dataset):
+
+    return fetch_all(
+        """
+        SELECT *
+
+        FROM data_pasien
+
+        WHERE id_dataset = ?
+
+        ORDER BY id_data
+        """,
+        (id_dataset,)
+    )
+
+
+# ==========================================
+# DATA BOBOT
+# ==========================================
+
+def ambil_data_bobot(id_dataset):
+
+    return fetch_all(
+        """
+        SELECT *
+
+        FROM data_pasien_bobot
+
+        WHERE id_dataset = ?
+
+        ORDER BY id_bobot
+        """,
+        (id_dataset,)
+    )
+
+
+
+# ==========================================
+# HAPUS DATASET
+# ==========================================
+
+def hapus_dataset(id_dataset):
+
+    return delete(
+        """
+        DELETE
+
+        FROM dataset
+
+        WHERE id_dataset = ?
+        """,
+        (id_dataset,)
+    )
+
+
+# ==========================================
+# UPDATE DATASET
+# ==========================================
+
+def update_dataset(
+
+    id_dataset,
+
+    nama_dataset,
+
+    deskripsi
+
+):
+
+    return update(
+        """
+        UPDATE dataset
+
+        SET
+
+            nama_dataset = ?,
+
+            deskripsi = ?
+
+        WHERE id_dataset = ?
+        """,
+        (
+            nama_dataset,
+            deskripsi,
+            id_dataset
+        )
+    )
+
+
+# ==========================================
+# TOTAL PASIEN
+# ==========================================
+
+def get_total_pasien(id_dataset):
+
+    hasil = fetch_one(
+        """
+        SELECT COUNT(*)
+
+        FROM data_pasien
+
+        WHERE id_dataset = ?
+        """,
+        (id_dataset,)
+    )
+
+    return hasil[0]
