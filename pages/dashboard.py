@@ -121,6 +121,15 @@ def show():
         st.info("Menu akan aktif setelah halaman dibuat.")
     
         st.divider()
+
+        if st.button(
+            "📂 Dataset Saya",
+            use_container_width=True
+        ):
+        
+            st.session_state["menu"] = "dataset"
+        
+            st.rerun()
     
         if st.button(
             "🚪 Logout",
