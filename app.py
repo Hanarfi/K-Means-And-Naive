@@ -10,11 +10,11 @@ from assets.load_css import load_css
 # IMPORT HALAMAN
 # ==========================================
 
-# from pages.login import show as login_page
-# from pages.register import show as register_page
+from pages.login import show as login_page
+from pages.register import show as register_page
 
-# from pages.dashboard import show as dashboard_page
-# from pages.dataset import show as dataset_page
+from pages.dashboard import show as dashboard_page
+from pages.dataset import show as dataset_page
 
 # Halaman berikutnya (aktifkan setelah dibuat)
 # from pages.visualisasi import show as visualisasi_page
