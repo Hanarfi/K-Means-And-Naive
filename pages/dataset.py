@@ -85,6 +85,12 @@ def preview_dataset(df):
 
 def show():
 
+    if "dataset_preview" not in st.session_state:
+        st.session_state.dataset_preview = None
+
+    if "nama_file" not in st.session_state:
+        st.session_state.nama_file = None
+
     login_required()
 
     st.title("📂 Dataset Saya")
