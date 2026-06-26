@@ -5,6 +5,14 @@ from models.auth import login_required
 from models.database_helper import simpan_dataset
 from models.auth import get_user_id
 
+from models.preprocessing import preprocessing_data
+from models.pembobotan import pembobotan_data
+
+from models.database_helper import (
+    simpan_dataset,
+    simpan_data_bobot
+)
+
 # ==========================================
 # KOLOM WAJIB
 # ==========================================
