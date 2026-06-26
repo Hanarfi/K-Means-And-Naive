@@ -165,7 +165,7 @@ def normalisasi_diagnosa(diagnosa):
 
         "KANKER": "Kanker",
 
-        "PERNAFASAN": "Pernafasan",
+        "PERNAPASAN": "Pernapasan",
 
         "PARU-PARU": "Paru-paru",
 
@@ -219,7 +219,7 @@ def validasi_diagnosa(dataframe):
 
         "Kanker",
 
-        "Pernafasan",
+        "Pernapasan",
 
         "Paru-paru",
 
