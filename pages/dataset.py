@@ -1,88 +1,128 @@
-import streamlit as st
 import pandas as pd
+import streamlit as st
 
-from models.auth import login_required
-from models.database_helper import simpan_dataset
-from models.auth import get_user_id
+from models.auth import (
+    login_required,
+    get_user_id
+)
 
-from models.preprocessing import preprocessing_data
-from models.pembobotan import pembobotan_data
+from models.preprocessing import (
+    preprocessing_data,
+    validasi_kolom
+)
+
+from models.pembobotan import (
+    pembobotan_data
+)
 
 from models.database_helper import (
     simpan_dataset,
     simpan_data_bobot
 )
 
+
 # ==========================================
-# KOLOM WAJIB
+# SESSION STATE
 # ==========================================
 
-KOLOM_WAJIB = [
+def init_session():
 
-    "No. Rekam Medis",
+    if "dataset_preview" not in st.session_state:
+        st.session_state.dataset_preview = None
 
-    "JK",
+    if "nama_file" not in st.session_state:
+        st.session_state.nama_file = None
 
-    "TGL MSK",
+    if "nama_dataset" not in st.session_state:
+        st.session_state.nama_dataset = ""
 
-    "TGL KELUAR",
+    if "deskripsi_dataset" not in st.session_state:
+        st.session_state.deskripsi_dataset = ""
 
-    "LD",
+    if "last_uploaded_file" not in st.session_state:
+        st.session_state.last_uploaded_file = ""
 
-    "Kelas Rawatan",
 
-    "Usia",
-
-    "Cara Keluar",
-
-    "Ruang Rawat",
-
-    "Diagnosa Utama"
-
-]
 
 
 # ==========================================
-# VALIDASI KOLOM
+# RESET SESSION
 # ==========================================
 
-def validasi_kolom(df):
+def reset_session():
 
-    kolom_file = list(df.columns)
+    st.session_state.dataset_preview = None
 
-    kolom_tidak_ada = []
+    st.session_state.nama_file = None
 
-    for kolom in KOLOM_WAJIB:
+    st.session_state.nama_dataset = ""
 
-        if kolom not in kolom_file:
+    st.session_state.deskripsi_dataset = "" 
+    
+    st.session_state.last_uploaded_file = None
 
-            kolom_tidak_ada.append(kolom)
 
-    return kolom_tidak_ada
 
 
 # ==========================================
-# PREVIEW
+# PREVIEW DATASET
 # ==========================================
 
 def preview_dataset(df):
 
-
-    st.subheader("Preview Dataset")
+    st.subheader("📄 Preview Dataset")
 
     st.dataframe(
         df,
-        use_container_width=True
+        use_container_width=True,
+        hide_index=True
     )
 
-    st.success(
-        f"Jumlah data : {len(df)} pasien"
-    )
+    col1, col2 = st.columns(2)
 
-    st.session_state.dataset_preview = df
+    with col1:
 
-    st.session_state.nama_file = file.name
+        st.info(
+            f"Jumlah Data : {len(df)}"
+        )
 
+    with col2:
+
+        st.success(
+            f"Jumlah Kolom : {len(df.columns)}"
+        )
+
+
+# ==========================================
+# BACA FILE EXCEL
+# ==========================================
+
+def baca_excel(file):
+
+    try:
+
+        df = pd.read_excel(file)
+
+        return True, df
+
+    except Exception as e:
+
+        return False, str(e)
+
+
+# ==========================================
+# VALIDASI DATASET
+# ==========================================
+
+def validasi_dataset(df):
+
+    kolom_error = validasi_kolom(df)
+
+    if len(kolom_error) > 0:
+
+        return False, kolom_error
+
+    return True, None
 
 
 # ==========================================
@@ -91,93 +131,134 @@ def preview_dataset(df):
 
 def show():
 
-    if "dataset_preview" not in st.session_state:
-        st.session_state.dataset_preview = None
-
-    if "nama_file" not in st.session_state:
-        st.session_state.nama_file = None
-
     login_required()
+
+    init_session()
 
     st.title("📂 Dataset Saya")
 
     st.write(
-        "Upload dataset pasien rawat inap."
+        """
+        Upload dataset pasien rawat inap
+        dalam format Microsoft Excel (.xlsx).
+        """
     )
 
     st.divider()
 
     nama_dataset = st.text_input(
-        "Nama Dataset"
+        "Nama Dataset",
+        value=st.session_state.nama_dataset
     )
 
     deskripsi = st.text_area(
-        "Deskripsi (Opsional)"
+        "Deskripsi Dataset",
+        value=st.session_state.deskripsi_dataset
     )
 
     file = st.file_uploader(
-
-        "Upload Dataset Excel",
-
-        type=[
-            "xlsx",
-            "xls"
-        ]
-
+        "Upload File Excel",
+        type=["xlsx", "xls"]
     )
 
-    if st.button(
+# ==========================================
+# DETEKSI PERUBAHAN FILE
+# ==========================================
 
-        "Preview Dataset",
+if file is not None:
 
-        use_container_width=True
+    if (
+
+        st.session_state.last_uploaded_file is not None
+
+        and
+
+        file.name != st.session_state.last_uploaded_file
 
     ):
 
-        if nama_dataset == "":
+        st.session_state.dataset_preview = None
 
-            st.error(
-                "Nama dataset wajib diisi."
-            )
+        st.session_state.nama_file = None
 
-            return
 
-        if file is None:
+# ==========================================
+# PREVIEW DATASET
+# ==========================================
 
-            st.error(
-                "Silakan pilih file."
-            )
+if st.button(
+    "📄 Preview Dataset",
+    use_container_width=True
+):
 
-            return
+    if nama_dataset.strip() == "":
 
-        try:
-
-            df = pd.read_excel(file)
-
-        except Exception as e:
-
-            st.error(e)
-
-            return
-
-        kolom_error = validasi_kolom(df)
-
-        if len(kolom_error) > 0:
-
-            st.error(
-                "Kolom berikut tidak ditemukan:"
-            )
-
-            for kolom in kolom_error:
-
-                st.write(
-                    f"- {kolom}"
-                )
-
-            return
-
-        st.success(
-            "Struktur dataset valid."
+        st.error(
+            "Nama dataset wajib diisi."
         )
 
-        preview_dataset(df)
+        st.stop()
+
+    if file is None:
+
+        st.error(
+            "Silakan pilih file Excel."
+        )
+
+        st.stop()
+
+    berhasil, hasil = baca_excel(file)
+
+    if not berhasil:
+
+        st.error(hasil)
+
+        st.stop()
+
+    df = hasil
+
+        valid, kolom_error = validasi_dataset(df)
+
+    if not valid:
+
+        st.error(
+            "Struktur dataset tidak sesuai."
+        )
+
+        st.write(
+            "Kolom berikut tidak ditemukan:"
+        )
+
+        for kolom in kolom_error:
+
+            st.write(
+                f"• {kolom}"
+            )
+
+            st.session_state.dataset_preview = df
+
+            st.session_state.nama_file = file.name
+        
+            st.success(
+                "Dataset berhasil dibaca dan siap dipreview."
+            )
+
+        st.stop()
+
+        
+
+
+
+    st.session_state.nama_dataset = nama_dataset
+
+    st.session_state.deskripsi_dataset = deskripsi
+
+# ==========================================
+# TAMPILKAN PREVIEW
+# ==========================================
+
+if st.session_state.dataset_preview is not None:
+
+    preview_dataset(
+        st.session_state.dataset_preview
+    )
