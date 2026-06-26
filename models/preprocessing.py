@@ -1,248 +1,291 @@
-# models/preprocessing.py
-
 import pandas as pd
 
 
-class Preprocessing:
+# ==========================================
+# KOLOM WAJIB
+# ==========================================
 
-    def __init__(self):
-        pass
+KOLOM_WAJIB = [
+    "No. Rekam Medis",
+    "JK",
+    "LD",
+    "Kelas Rawatan",
+    "Usia",
+    "Cara Keluar",
+    "Ruang Rawat",
+    "Diagnosa Utama"
+]
 
-    # ==================================================
-    # VALIDASI KOLOM
-    # ==================================================
 
-    def validasi_kolom(self, dataframe):
+# ==========================================
+# VALIDASI KOLOM
+# ==========================================
 
-        kolom_wajib = [
-            "No. Rekam Medis",
-            "JK",
-            "LD",
-            "Kelas Rawatan",
-            "Usia",
-            "Cara Keluar",
-            "Ruang Rawat",
-            "Diagnosa Utama"
-        ]
+def validasi_kolom(dataframe):
 
-        kolom_tidak_ada = []
+    kolom_hilang = [
+        kolom
+        for kolom in KOLOM_WAJIB
+        if kolom not in dataframe.columns
+    ]
 
-        for kolom in kolom_wajib:
+    return kolom_hilang
 
-            if kolom not in dataframe.columns:
-                kolom_tidak_ada.append(kolom)
 
-        return kolom_tidak_ada
+# ==========================================
+# MEMBERSIHKAN DATA
+# ==========================================
 
-    # ==================================================
-    # MEMBERSIHKAN DATA
-    # ==================================================
+def bersihkan_data(dataframe):
 
-    def bersihkan_data(self, dataframe):
+    df = dataframe.copy()
 
-        df = dataframe.copy()
+    df.columns = df.columns.str.strip()
 
-        # Hapus spasi awal dan akhir
-        df.columns = df.columns.str.strip()
+    df = df.dropna(how="all")
 
-        # Hapus baris kosong
-        df = df.dropna(how="all")
+    df = df.drop_duplicates()
 
-        # Hapus duplikat
-        df = df.drop_duplicates()
+    return df
 
-        return df
 
-    # ==================================================
-    # NORMALISASI JK
-    # ==================================================
+# ==========================================
+# NORMALISASI JK
+# ==========================================
 
-    def normalisasi_jk(self, nilai):
+def normalisasi_jk(nilai):
 
-        mapping = {
-            "L": "Laki-Laki",
-            "P": "Perempuan"
-        }
+    mapping = {
 
-        return mapping.get(
-            str(nilai).strip().upper(),
-            str(nilai).strip()
-        )
+        "L": "Laki-Laki",
 
-    # ==================================================
-    # KATEGORI LAMA RAWAT
-    # ==================================================
+        "P": "Perempuan"
 
-    def kategori_lama_rawat(self, hari):
+    }
 
-        try:
+    return mapping.get(
 
-            hari = int(hari)
+        str(nilai).strip().upper(),
 
-            if hari <= 10:
-                return "1-10 Hari"
+        str(nilai).strip()
 
-            elif hari <= 20:
-                return "11-20 Hari"
+    )
 
-            else:
-                return ">20 Hari"
 
-        except:
-            return None
+# ==========================================
+# KATEGORI LAMA RAWAT
+# ==========================================
 
-    # ==================================================
-    # KATEGORI USIA
-    # ==================================================
+def kategori_lama_rawat(hari):
 
-    def kategori_usia(self, usia):
+    try:
 
-        try:
+        hari = int(hari)
 
-            usia = int(usia)
+    except (TypeError, ValueError):
 
-            if usia <= 5:
-                return "0-5 Tahun"
+        return None
 
-            elif usia <= 12:
-                return "6-12 Tahun"
+    if hari <= 10:
 
-            else:
-                return "13-18 Tahun"
+        return "1-10 Hari"
 
-        except:
-            return None
+    elif hari <= 20:
 
-    # ==================================================
-    # NORMALISASI DIAGNOSA
-    # ==================================================
+        return "11-20 Hari"
 
-    def normalisasi_diagnosa(self, diagnosa):
+    else:
 
-        diagnosa = str(diagnosa).strip().upper()
+        return ">20 Hari"
 
-        mapping = {
-            "KANKER": "Kanker",
-            "PERNAFASAN": "Pernafasan",
-            "PARU-PARU": "Paru-paru",
-            "PENCERNAAN": "Pencernaan",
-            "CAMPAK": "Campak"
-        }
 
-        return mapping.get(
-            diagnosa,
-            diagnosa.title()
-        )
+# ==========================================
+# KATEGORI USIA
+# ==========================================
 
-    # ==================================================
-    # NORMALISASI RUANG RAWAT
-    # ==================================================
+def kategori_usia(usia):
 
-    def normalisasi_ruang_rawat(self, ruang):
+    try:
 
-        ruang = str(ruang).strip().upper()
+        usia = int(usia)
 
-        mapping = {
-            "SAKURA 1 (AKUT)": "Sakura 1 (Akut)",
-            "SAKURA 2 (KRONIS)": "Sakura 2 (Kronis)",
-            "LAVENDER 11 (HCU SCN)": "Lavender 11 (HCU SCN)"
-        }
+    except (TypeError, ValueError):
 
-        return mapping.get(
-            ruang,
-            ruang.title()
-        )
-    def normalisasi_kelas_rawat(self, kelas):
-        """
-        Menyamakan format penulisan kelas rawatan
-        """
+        return None
 
-        kelas = str(kelas).strip().upper()
+    if usia <= 5:
 
-        mapping = {
-            "KELAS II": "Kelas II",
-            "KELAS III": "Kelas III",
-            "PICU": "PICU",
-            "ISOLASI": "Isolasi"
-        }
+        return "0-5 Tahun"
 
-        return mapping.get(
-            kelas,
-            str(kelas).title()
-        )
+    elif usia <= 12:
 
-    # ==================================================
-    # PROSES UTAMA PREPROCESSING
-    # ==================================================
+        return "6-12 Tahun"
 
-    def proses(self, dataframe):
+    else:
 
-        df = dataframe.copy()
+        return "13-18 Tahun"
 
-        # Bersihkan data
-        df = self.bersihkan_data(df)
 
-        # Normalisasi JK
-        df["JK"] = (
-            df["JK"]
-            .apply(self.normalisasi_jk)
-        )
+# ==========================================
+# NORMALISASI KELAS RAWATAN
+# ==========================================
 
-        # Kategori Lama Rawat
-        df["LD_KATEGORI"] = (
-            df["LD"]
-            .apply(self.kategori_lama_rawat)
-        )
+def normalisasi_kelas_rawatan(kelas):
 
-        # Kategori Usia
-        df["USIA_KATEGORI"] = (
-            df["Usia"]
-            .apply(self.kategori_usia)
-        )
+    mapping = {
 
-        # Normalisasi Kelas Rawatan
-        df["Kelas Rawatan"] = (
-            df["Kelas Rawatan"]
-            .apply(self.normalisasi_kelas_rawat)
-        )
+        "KELAS II": "Kelas II",
 
-        # Normalisasi Diagnosa
-        df["Diagnosa Utama"] = (
-            df["Diagnosa Utama"]
-            .apply(self.normalisasi_diagnosa)
-        )
+        "KELAS III": "Kelas III",
 
-        # Normalisasi Ruang Rawat
-        df["Ruang Rawat"] = (
-            df["Ruang Rawat"]
-            .apply(self.normalisasi_ruang_rawat)
-        )
+        "PICU": "PICU",
 
-        return df
-    
-    def validasi_diagnosa(self, dataframe):
-        """
-        Memastikan hanya diagnosa yang
-        diperbolehkan dalam penelitian
-        """
+        "ISOLASI": "Isolasi"
 
-        diagnosa_valid = {
-            "Kanker",
-            "Pernafasan",
-            "Paru-paru",
-            "Pencernaan",
-            "Campak"
-        }
+    }
 
-        diagnosa_dataset = set(
-            dataframe["Diagnosa Utama"]
-            .dropna()
-            .unique()
-        )
+    return mapping.get(
 
-        diagnosa_tidak_valid = (
-            diagnosa_dataset
-            - diagnosa_valid
-        )
+        str(kelas).strip().upper(),
 
-        return list(diagnosa_tidak_valid)
+        str(kelas).strip().title()
+
+    )
+
+
+# ==========================================
+# NORMALISASI DIAGNOSA
+# ==========================================
+
+def normalisasi_diagnosa(diagnosa):
+
+    mapping = {
+
+        "KANKER": "Kanker",
+
+        "PERNAFASAN": "Pernafasan",
+
+        "PARU-PARU": "Paru-paru",
+
+        "PENCERNAAN": "Pencernaan",
+
+        "CAMPAK": "Campak"
+
+    }
+
+    return mapping.get(
+
+        str(diagnosa).strip().upper(),
+
+        str(diagnosa).strip().title()
+
+    )
+
+
+# ==========================================
+# NORMALISASI RUANG RAWAT
+# ==========================================
+
+def normalisasi_ruang_rawat(ruang):
+
+    mapping = {
+
+        "SAKURA 1 (AKUT)": "Sakura 1 (Akut)",
+
+        "SAKURA 2 (KRONIS)": "Sakura 2 (Kronis)",
+
+        "LAVENDER 11 (HCU SCN)": "Lavender 11 (HCU SCN)"
+
+    }
+
+    return mapping.get(
+
+        str(ruang).strip().upper(),
+
+        str(ruang).strip().title()
+
+    )
+
+
+# ==========================================
+# VALIDASI DIAGNOSA
+# ==========================================
+
+def validasi_diagnosa(dataframe):
+
+    diagnosa_valid = {
+
+        "Kanker",
+
+        "Pernafasan",
+
+        "Paru-paru",
+
+        "Pencernaan",
+
+        "Campak"
+
+    }
+
+    diagnosa_dataset = set(
+
+        dataframe["Diagnosa Utama"]
+
+        .dropna()
+
+        .unique()
+
+    )
+
+    return list(
+
+        diagnosa_dataset
+
+        - diagnosa_valid
+
+    )
+
+
+# ==========================================
+# PREPROCESSING UTAMA
+# ==========================================
+
+def preprocessing_data(dataframe):
+
+    df = bersihkan_data(dataframe)
+
+    df["JK"] = df["JK"].apply(normalisasi_jk)
+
+    df["LD"] = df["LD"].astype(int)
+
+    df["Usia"] = df["Usia"].astype(int)
+
+    df["LD_KATEGORI"] = df["LD"].apply(kategori_lama_rawat)
+
+    df["USIA_KATEGORI"] = df["Usia"].apply(kategori_usia)
+
+    df["Kelas Rawatan"] = (
+
+        df["Kelas Rawatan"]
+
+        .apply(normalisasi_kelas_rawatan)
+
+    )
+
+    df["Diagnosa Utama"] = (
+
+        df["Diagnosa Utama"]
+
+        .apply(normalisasi_diagnosa)
+
+    )
+
+    df["Ruang Rawat"] = (
+
+        df["Ruang Rawat"]
+
+        .apply(normalisasi_ruang_rawat)
+
+    )
+
+    return df
