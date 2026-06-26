@@ -64,7 +64,7 @@ MASTER_BOBOT = {
     "Diagnosa Utama": {
 
         "Kanker": 1,
-        "Pernafasan": 2,
+        "Pernapasan": 2,
         "Paru-paru": 3,
         "Pencernaan": 4,
         "Campak": 5
