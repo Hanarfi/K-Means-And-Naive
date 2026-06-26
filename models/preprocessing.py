@@ -8,6 +8,8 @@ import pandas as pd
 KOLOM_WAJIB = [
     "No. Rekam Medis",
     "JK",
+    "TGL MSK",
+    "TGL KELUAR",
     "LD",
     "Kelas Rawatan",
     "Usia",
