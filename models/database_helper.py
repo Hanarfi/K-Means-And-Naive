@@ -631,3 +631,267 @@ def simpan_data_bobot(
         conn.close()
 
 
+# ==========================================
+# DAFTAR DATASET USER
+# ==========================================
+
+def get_dataset_user(id_pengguna):
+
+    return fetch_all(
+
+        """
+
+        SELECT
+
+            id_dataset,
+
+            nama_dataset,
+
+            deskripsi,
+
+            nama_file,
+
+            jumlah_data,
+
+            tanggal_upload
+
+        FROM dataset
+
+        WHERE id_pengguna = ?
+
+        ORDER BY tanggal_upload DESC
+
+        """,
+
+        (id_pengguna,)
+
+    )
+
+
+# ==========================================
+# DETAIL DATASET
+# ==========================================
+
+def get_detail_dataset(id_dataset):
+
+    return fetch_one(
+
+        """
+
+        SELECT
+
+            *
+
+        FROM dataset
+
+        WHERE id_dataset = ?
+
+        """,
+
+        (id_dataset,)
+
+    )
+
+
+# ==========================================
+# DATA PASIEN BERDASARKAN DATASET
+# ==========================================
+
+def get_data_pasien(id_dataset):
+
+    return fetch_all(
+
+        """
+
+        SELECT
+
+            *
+
+        FROM data_pasien
+
+        WHERE id_dataset = ?
+
+        ORDER BY id_pasien
+
+        """,
+
+        (id_dataset,)
+
+    )
+
+
+# ==========================================
+# DATA BOBOT BERDASARKAN DATASET
+# ==========================================
+
+def get_data_bobot(id_dataset):
+
+    return fetch_all(
+
+        """
+
+        SELECT
+
+            *
+
+        FROM data_pasien_bobot
+
+        WHERE id_dataset = ?
+
+        ORDER BY id_pasien
+
+        """,
+
+        (id_dataset,)
+
+    )
+
+
+# ==========================================
+# CEK DATASET
+# ==========================================
+
+def get_dataset_by_id(id_dataset):
+
+    return fetch_one(
+
+        """
+
+        SELECT *
+
+        FROM dataset
+
+        WHERE id_dataset = ?
+
+        """,
+
+        (id_dataset,)
+
+    )
+
+
+# ==========================================
+# HAPUS DATASET
+# ==========================================
+
+def hapus_dataset(id_dataset):
+
+    conn = get_connection()
+
+    try:
+
+        cursor = conn.cursor()
+
+        cursor.execute(
+
+            """
+
+            DELETE
+
+            FROM dataset
+
+            WHERE id_dataset = ?
+
+            """,
+
+            (id_dataset,)
+
+        )
+
+        conn.commit()
+
+        return True
+
+    except Exception as e:
+
+        conn.rollback()
+
+        return False, str(e)
+
+    finally:
+
+        conn.close()
+
+
+# ==========================================
+# RIWAYAT DATASET USER
+# ==========================================
+
+def get_riwayat_user(id_pengguna):
+
+    return fetch_all(
+
+        """
+
+        SELECT
+
+            r.id_riwayat,
+
+            r.jenis_analisis,
+
+            r.tanggal_analisis,
+
+            d.nama_dataset
+
+        FROM riwayat_analisis r
+
+        JOIN dataset d
+
+        ON r.id_dataset = d.id_dataset
+
+        WHERE r.id_pengguna = ?
+
+        ORDER BY r.tanggal_analisis DESC
+
+        """,
+
+        (id_pengguna,)
+
+    )
+
+
+# ==========================================
+# PREVIEW DATASET
+# ==========================================
+
+def preview_dataset(id_dataset, limit=10):
+
+    return fetch_all(
+
+        """
+
+        SELECT
+
+            no_rekam_medis,
+
+            jk,
+
+            lama_rawat,
+
+            kelas_rawatan,
+
+            usia,
+
+            cara_keluar,
+
+            ruang_rawat,
+
+            diagnosa_utama
+
+        FROM data_pasien
+
+        WHERE id_dataset = ?
+
+        LIMIT ?
+
+        """,
+
+        (
+
+            id_dataset,
+
+            limit
+
+        )
+
+    )
