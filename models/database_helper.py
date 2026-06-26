@@ -813,40 +813,5 @@ def hapus_dataset(id_dataset):
         conn.close()
 
 
-# ==========================================
-# RIWAYAT DATASET USER
-# ==========================================
-
-def get_riwayat_user(id_pengguna):
-
-    return fetch_all(
-
-        """
-
-        SELECT
-
-            r.id_riwayat,
-
-            r.jenis_analisis,
-
-            r.tanggal_analisis,
-
-            d.nama_dataset
-
-        FROM riwayat_analisis r
-
-        JOIN dataset d
-
-        ON r.id_dataset = d.id_dataset
-
-        WHERE r.id_pengguna = ?
-
-        ORDER BY r.tanggal_analisis DESC
-
-        """,
-
-        (id_pengguna,)
-
-    )
 
 
