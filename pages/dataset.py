@@ -287,79 +287,82 @@ def show():
         if st.button(
             "💾 Simpan Dataset",
             use_container_width=True
+
+            progress = st.progress(0)
+
+            status = st.empty()
+            df = st.session_state.dataset_preview
+            status.write(
+                "Melakukan preprocessing..."
+            )
+        
+            progress.progress(20)
+        
+            df_bersih = preprocessing_data(df)
+            status.write(
+                "Melakukan pembobotan..."
+            )
+        
+            progress.progress(40)
+        
+            df_bobot = pembobotan_data(
+                df_bersih
+            )
+            status.write(
+                "Menyimpan dataset..."
+            )
+        
+            progress.progress(70)
+        
+            berhasil, hasil = simpan_dataset(
+        
+                get_user_id(),
+        
+                nama_dataset,
+        
+                deskripsi,
+        
+                st.session_state.nama_file,
+        
+                df_bersih
+        
+            )
+                if berhasil:
+    
+            status.write(
+                "Menyimpan data berbobot..."
+            )
+    
+            progress.progress(90)
+    
+            simpan_data_bobot(
+                hasil,
+                df_bobot
+            )
+                    progress.progress(100)
+    
+            status.success(
+                "Dataset berhasil disimpan."
+            )
+    
+            st.success(
+                "Dataset berhasil diproses."
+            )
+    
+            st.balloons()
+    
+            reset_session()
+    
+            st.rerun()
+                else:
+    
+            progress.empty()
+    
+            st.error(
+                hasil
+            )
+            
         ):
 
-        progress = st.progress(0)
-
-        status = st.empty()
-        df = st.session_state.dataset_preview
-        status.write(
-            "Melakukan preprocessing..."
-        )
-    
-        progress.progress(20)
-    
-        df_bersih = preprocessing_data(df)
-        status.write(
-            "Melakukan pembobotan..."
-        )
-    
-        progress.progress(40)
-    
-        df_bobot = pembobotan_data(
-            df_bersih
-        )
-        status.write(
-            "Menyimpan dataset..."
-        )
-    
-        progress.progress(70)
-    
-        berhasil, hasil = simpan_dataset(
-    
-            get_user_id(),
-    
-            nama_dataset,
-    
-            deskripsi,
-    
-            st.session_state.nama_file,
-    
-            df_bersih
-    
-        )
-            if berhasil:
-
-        status.write(
-            "Menyimpan data berbobot..."
-        )
-
-        progress.progress(90)
-
-        simpan_data_bobot(
-            hasil,
-            df_bobot
-        )
-                progress.progress(100)
-
-        status.success(
-            "Dataset berhasil disimpan."
-        )
-
-        st.success(
-            "Dataset berhasil diproses."
-        )
-
-        st.balloons()
-
-        reset_session()
-
-        st.rerun()
-            else:
-
-        progress.empty()
-
-        st.error(
-            hasil
-        )
+        
 
