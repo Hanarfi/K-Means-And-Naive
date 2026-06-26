@@ -850,6 +850,3 @@ def get_riwayat_user(id_pengguna):
     )
 
 
-
-
-    )
