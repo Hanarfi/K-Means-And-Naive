@@ -125,63 +125,6 @@ def validasi_dataset(df):
     return True, None
 
 
-# ==========================================
-# HALAMAN DATASET
-# ==========================================
-
-def show():
-
-    login_required()
-
-    init_session()
-
-    st.title("📂 Dataset Saya")
-
-    st.write(
-        """
-        Upload dataset pasien rawat inap
-        dalam format Microsoft Excel (.xlsx).
-        """
-    )
-
-    st.divider()
-
-    nama_dataset = st.text_input(
-        "Nama Dataset",
-        value=st.session_state.nama_dataset
-    )
-
-    deskripsi = st.text_area(
-        "Deskripsi Dataset",
-        value=st.session_state.deskripsi_dataset
-    )
-
-    file = st.file_uploader(
-        "Upload File Excel",
-        type=["xlsx", "xls"]
-    )
-
-    # ==========================================
-    # DETEKSI PERUBAHAN FILE
-    # ==========================================
-    
-    if file is not None:
-    
-        if (
-    
-            st.session_state.last_uploaded_file is not None
-    
-            and
-    
-            file.name != st.session_state.last_uploaded_file
-    
-        ):
-    
-            st.session_state.dataset_preview = None
-    
-            st.session_state.nama_file = None
-
-
 
 
 # ==========================================
@@ -340,12 +283,4 @@ def show():
             st.session_state.dataset_preview
         )
 
-# ==========================================
-# TAMPILKAN PREVIEW
-# ==========================================
 
-if st.session_state.dataset_preview is not None:
-
-    preview_dataset(
-        st.session_state.dataset_preview
-    )
