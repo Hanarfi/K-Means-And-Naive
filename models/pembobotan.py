@@ -1,196 +1,198 @@
-# models/pembobotan.py
-
-from database.koneksi import get_connection
+import pandas as pd
 
 
-class Pembobotan:
+# ==========================================
+# MASTER BOBOT
+# ==========================================
 
-    def __init__(self):
-        self.conn = get_connection()
+BOBOT = {
 
-    def ambil_mapping_bobot(self, atribut):
-        """
-        Mengambil mapping bobot dari database
+    "JK": {
 
-        Contoh:
-        {
-            'Laki-Laki': 2,
-            'Perempuan': 1
-        }
-        """
+        "Perempuan": 1,
 
-        cursor = self.conn.cursor()
+        "Laki-Laki": 2
 
-        cursor.execute("""
-            SELECT kategori, bobot
-            FROM bobot_atribut
-            WHERE atribut = ?
-        """, (atribut,))
+    },
 
-        hasil = cursor.fetchall()
+    "LD": {
 
-        mapping = {
-            row["kategori"]: row["bobot"]
-            for row in hasil
-        }
+        "1-10 Hari": 1,
 
-        return mapping
+        "11-20 Hari": 2,
 
-    def validasi_kategori(self, dataframe):
-        """
-        Memastikan seluruh kategori
-        tersedia pada tabel bobot_atribut
-        """
+        ">20 Hari": 3
 
-        kolom_mapping = {
-            "JK": "jenis_kelamin",
-            "LD_KATEGORI": "lama_rawat",
-            "Kelas Rawatan": "kelas_rawat",
-            "USIA_KATEGORI": "usia",
-            "Cara Keluar": "cara_keluar",
-            "Ruang Rawat": "ruang_rawat",
-            "Diagnosa Utama": "diagnosa_utama"
-        }
+    },
 
-        daftar_error = []
+    "Kelas Rawatan": {
 
-        for kolom, atribut in kolom_mapping.items():
+        "Kelas II": 1,
 
-            mapping = self.ambil_mapping_bobot(
-                atribut
-            )
+        "Kelas III": 2,
 
-            kategori_database = set(
-                mapping.keys()
-            )
+        "PICU": 3,
 
-            kategori_dataset = set(
-                dataframe[kolom]
-                .dropna()
-                .unique()
-            )
+        "Isolasi": 4
 
-            kategori_tidak_ditemukan = (
-                kategori_dataset
-                - kategori_database
-            )
+    },
 
-            if kategori_tidak_ditemukan:
+    "Usia": {
 
-                daftar_error.append({
-                    "kolom": kolom,
-                    "kategori": list(
-                        kategori_tidak_ditemukan
-                    )
-                })
+        "0-5 Tahun": 1,
 
-        return daftar_error
+        "6-12 Tahun": 2,
 
-    def transformasi_dataset(self, dataframe):
-        """
-        Mengubah kategori menjadi bobot
-        """
+        "13-18 Tahun": 3
 
-        df = dataframe.copy()
+    },
 
-        # Simpan data kategori asli
+    "Cara Keluar": {
 
-        df["jenis_kelamin_asli"] = df["JK"]
-        df["lama_rawat_asli"] = df["LD_KATEGORI"]
-        df["kelas_rawat_asli"] = df["Kelas Rawatan"]
-        df["usia_asli"] = df["USIA_KATEGORI"]
-        df["cara_keluar_asli"] = df["Cara Keluar"]
-        df["ruang_rawat_asli"] = df["Ruang Rawat"]
-        df["diagnosa_utama_asli"] = df["Diagnosa Utama"]
+        "Dipulangkan": 1,
 
-        # Mapping bobot
+        "Meninggal": 2
 
-        map_jk = self.ambil_mapping_bobot(
-            "jenis_kelamin"
+    },
+
+    "Ruang Rawat": {
+
+        "Sakura 1 (Akut)": 1,
+
+        "Sakura 2 (Kronis)": 2,
+
+        "Lavender 11 (HCU SCN)": 3
+
+    },
+
+    "Diagnosa Utama": {
+
+        "Kanker": 1,
+
+        "Pernafasan": 2,
+
+        "Paru-paru": 3,
+
+        "Pencernaan": 4,
+
+        "Campak": 5
+
+    }
+
+}
+
+# ==========================================
+# PEMBOBOTAN SATU KOLOM
+# ==========================================
+
+def bobot_kolom(series, mapping):
+
+    return series.map(mapping)
+
+
+# ==========================================
+# VALIDASI
+# ==========================================
+
+def validasi_bobot(df):
+
+    error = {}
+
+    for kolom, mapping in BOBOT.items():
+
+        sumber = kolom
+
+        if kolom == "LD":
+
+            sumber = "LD_KATEGORI"
+
+        elif kolom == "Usia":
+
+            sumber = "USIA_KATEGORI"
+
+        nilai = set(
+
+            df[sumber]
+
+            .dropna()
+
+            .unique()
+
         )
 
-        map_ld = self.ambil_mapping_bobot(
-            "lama_rawat"
-        )
+        tidak_ditemukan = nilai - set(mapping.keys())
 
-        map_kelas = self.ambil_mapping_bobot(
-            "kelas_rawat"
-        )
+        if tidak_ditemukan:
 
-        map_usia = self.ambil_mapping_bobot(
-            "usia"
-        )
+            error[kolom] = list(tidak_ditemukan)
 
-        map_keluar = self.ambil_mapping_bobot(
-            "cara_keluar"
-        )
+    return error
 
-        map_ruang = self.ambil_mapping_bobot(
-            "ruang_rawat"
-        )
 
-        map_diagnosa = self.ambil_mapping_bobot(
-            "diagnosa_utama"
-        )
+# ==========================================
+# PEMBOBOTAN DATA
+# ==========================================
 
-        # Konversi menjadi bobot
+def pembobotan_data(dataframe):
 
-        df["jenis_kelamin"] = (
-            df["JK"]
-            .map(map_jk)
-        )
+    df = dataframe.copy()
 
-        df["lama_rawat"] = (
-            df["LD_KATEGORI"]
-            .map(map_ld)
-        )
+    df_bobot = pd.DataFrame()
 
-        df["kelas_rawat"] = (
-            df["Kelas Rawatan"]
-            .map(map_kelas)
-        )
+    df_bobot["JK"] = bobot_kolom(
 
-        df["usia"] = (
-            df["USIA_KATEGORI"]
-            .map(map_usia)
-        )
+        df["JK"],
 
-        df["cara_keluar"] = (
-            df["Cara Keluar"]
-            .map(map_keluar)
-        )
+        BOBOT["JK"]
 
-        df["ruang_rawat"] = (
-            df["Ruang Rawat"]
-            .map(map_ruang)
-        )
+    )
 
-        df["diagnosa_utama"] = (
-            df["Diagnosa Utama"]
-            .map(map_diagnosa)
-        )
+    df_bobot["LD"] = bobot_kolom(
 
-        return df
+        df["LD_KATEGORI"],
 
-    def ambil_fitur_kmeans(self, dataframe):
-        """
-        Mengambil fitur numerik
-        untuk proses K-Means
-        """
+        BOBOT["LD"]
 
-        return dataframe[
-            [
-                "jenis_kelamin",
-                "lama_rawat",
-                "kelas_rawat",
-                "usia",
-                "cara_keluar",
-                "ruang_rawat",
-                "diagnosa_utama"
-            ]
-        ]
+    )
 
-    def tutup_koneksi(self):
+    df_bobot["Kelas Rawatan"] = bobot_kolom(
 
-        if self.conn:
-            self.conn.close()
+        df["Kelas Rawatan"],
+
+        BOBOT["Kelas Rawatan"]
+
+    )
+
+    df_bobot["Usia"] = bobot_kolom(
+
+        df["USIA_KATEGORI"],
+
+        BOBOT["Usia"]
+
+    )
+
+    df_bobot["Cara Keluar"] = bobot_kolom(
+
+        df["Cara Keluar"],
+
+        BOBOT["Cara Keluar"]
+
+    )
+
+    df_bobot["Ruang Rawat"] = bobot_kolom(
+
+        df["Ruang Rawat"],
+
+        BOBOT["Ruang Rawat"]
+
+    )
+
+    df_bobot["Diagnosa Utama"] = bobot_kolom(
+
+        df["Diagnosa Utama"],
+
+        BOBOT["Diagnosa Utama"]
+
+    )
+
+    return df_bobot
