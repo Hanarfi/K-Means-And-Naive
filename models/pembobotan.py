@@ -1,85 +1,7 @@
 import pandas as pd
 
+from models.master_bobot import MASTER_BOBOT
 
-# ==========================================
-# MASTER BOBOT
-# ==========================================
-
-BOBOT = {
-
-    "JK": {
-
-        "Perempuan": 1,
-
-        "Laki-Laki": 2
-
-    },
-
-    "LD": {
-
-        "1-10 Hari": 1,
-
-        "11-20 Hari": 2,
-
-        ">20 Hari": 3
-
-    },
-
-    "Kelas Rawatan": {
-
-        "Kelas II": 1,
-
-        "Kelas III": 2,
-
-        "PICU": 3,
-
-        "Isolasi": 4
-
-    },
-
-    "Usia": {
-
-        "0-5 Tahun": 1,
-
-        "6-12 Tahun": 2,
-
-        "13-18 Tahun": 3
-
-    },
-
-    "Cara Keluar": {
-
-        "Dipulangkan": 1,
-
-        "Meninggal": 2
-
-    },
-
-    "Ruang Rawat": {
-
-        "Sakura 1 (Akut)": 1,
-
-        "Sakura 2 (Kronis)": 2,
-
-        "Lavender 11 (HCU SCN)": 3
-
-    },
-
-    "Diagnosa Utama": {
-
-        "Kanker": 1,
-
-        "Pernafasan": 2,
-
-        "Paru-paru": 3,
-
-        "Pencernaan": 4,
-
-        "Campak": 5
-
-    }
-
-}
 
 # ==========================================
 # PEMBOBOTAN SATU KOLOM
@@ -91,28 +13,38 @@ def bobot_kolom(series, mapping):
 
 
 # ==========================================
-# VALIDASI
+# VALIDASI MASTER BOBOT
 # ==========================================
 
-def validasi_bobot(df):
+def validasi_bobot(dataframe):
+
+    sumber_kolom = {
+
+        "JK": "JK",
+
+        "LD": "LD_KATEGORI",
+
+        "Kelas Rawatan": "Kelas Rawatan",
+
+        "Usia": "USIA_KATEGORI",
+
+        "Cara Keluar": "Cara Keluar",
+
+        "Ruang Rawat": "Ruang Rawat",
+
+        "Diagnosa Utama": "Diagnosa Utama"
+
+    }
 
     error = {}
 
-    for kolom, mapping in BOBOT.items():
+    for atribut, mapping in MASTER_BOBOT.items():
 
-        sumber = kolom
+        kolom = sumber_kolom[atribut]
 
-        if kolom == "LD":
+        nilai_dataset = set(
 
-            sumber = "LD_KATEGORI"
-
-        elif kolom == "Usia":
-
-            sumber = "USIA_KATEGORI"
-
-        nilai = set(
-
-            df[sumber]
+            dataframe[kolom]
 
             .dropna()
 
@@ -120,79 +52,93 @@ def validasi_bobot(df):
 
         )
 
-        tidak_ditemukan = nilai - set(mapping.keys())
+        nilai_master = set(
 
-        if tidak_ditemukan:
+            mapping.keys()
 
-            error[kolom] = list(tidak_ditemukan)
+        )
+
+        tidak_dikenal = nilai_dataset - nilai_master
+
+        if tidak_dikenal:
+
+            error[atribut] = list(tidak_dikenal)
 
     return error
 
 
 # ==========================================
-# PEMBOBOTAN DATA
+# PEMBOBOTAN DATASET
 # ==========================================
 
 def pembobotan_data(dataframe):
 
-    df = dataframe.copy()
+    error = validasi_bobot(dataframe)
 
-    df_bobot = pd.DataFrame()
+    if error:
 
-    df_bobot["JK"] = bobot_kolom(
+        raise ValueError(
 
-        df["JK"],
+            f"Nilai tidak terdapat pada master bobot : {error}"
 
-        BOBOT["JK"]
+        )
 
-    )
+    df = pd.DataFrame()
 
-    df_bobot["LD"] = bobot_kolom(
+    df["JK"] = bobot_kolom(
 
-        df["LD_KATEGORI"],
+        dataframe["JK"],
 
-        BOBOT["LD"]
-
-    )
-
-    df_bobot["Kelas Rawatan"] = bobot_kolom(
-
-        df["Kelas Rawatan"],
-
-        BOBOT["Kelas Rawatan"]
+        MASTER_BOBOT["JK"]
 
     )
 
-    df_bobot["Usia"] = bobot_kolom(
+    df["LD"] = bobot_kolom(
 
-        df["USIA_KATEGORI"],
+        dataframe["LD_KATEGORI"],
 
-        BOBOT["Usia"]
-
-    )
-
-    df_bobot["Cara Keluar"] = bobot_kolom(
-
-        df["Cara Keluar"],
-
-        BOBOT["Cara Keluar"]
+        MASTER_BOBOT["LD"]
 
     )
 
-    df_bobot["Ruang Rawat"] = bobot_kolom(
+    df["Kelas Rawatan"] = bobot_kolom(
 
-        df["Ruang Rawat"],
+        dataframe["Kelas Rawatan"],
 
-        BOBOT["Ruang Rawat"]
-
-    )
-
-    df_bobot["Diagnosa Utama"] = bobot_kolom(
-
-        df["Diagnosa Utama"],
-
-        BOBOT["Diagnosa Utama"]
+        MASTER_BOBOT["Kelas Rawatan"]
 
     )
 
-    return df_bobot
+    df["Usia"] = bobot_kolom(
+
+        dataframe["USIA_KATEGORI"],
+
+        MASTER_BOBOT["Usia"]
+
+    )
+
+    df["Cara Keluar"] = bobot_kolom(
+
+        dataframe["Cara Keluar"],
+
+        MASTER_BOBOT["Cara Keluar"]
+
+    )
+
+    df["Ruang Rawat"] = bobot_kolom(
+
+        dataframe["Ruang Rawat"],
+
+        MASTER_BOBOT["Ruang Rawat"]
+
+    )
+
+    df["Diagnosa Utama"] = bobot_kolom(
+
+        dataframe["Diagnosa Utama"],
+
+        MASTER_BOBOT["Diagnosa Utama"]
+
+    )
+
+    return df
