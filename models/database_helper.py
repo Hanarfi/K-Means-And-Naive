@@ -850,3 +850,48 @@ def get_riwayat_user(id_pengguna):
     )
 
 
+# ==========================================
+# PREVIEW DATASET
+# ==========================================
+
+def preview_dataset(id_dataset, limit=10):
+
+    return fetch_all(
+
+        """
+
+        SELECT
+
+            no_rekam_medis,
+
+            jk,
+
+            lama_rawat,
+
+            kelas_rawatan,
+
+            usia,
+
+            cara_keluar,
+
+            ruang_rawat,
+
+            diagnosa_utama
+
+        FROM data_pasien
+
+        WHERE id_dataset = ?
+
+        LIMIT ?
+
+        """,
+
+        (
+
+            id_dataset,
+
+            limit
+
+        )
+
+    )
