@@ -246,3 +246,106 @@ def delete(query, params=()):
     return jumlah
 
 
+from database.koneksi import get_connection
+
+
+# ==========================================
+# SIMPAN DATASET + DATA PASIEN
+# ==========================================
+
+def simpan_dataset(
+    id_pengguna,
+    nama_dataset,
+    deskripsi,
+    nama_file,
+    dataframe
+):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    try:
+        conn.execute("BEGIN")
+
+        # Simpan metadata dataset
+        cursor.execute(
+            """
+            INSERT INTO dataset
+            (
+                id_pengguna,
+                nama_dataset,
+                deskripsi,
+                nama_file,
+                jumlah_data
+            )
+            VALUES (?, ?, ?, ?, ?)
+            """,
+            (
+                id_pengguna,
+                nama_dataset,
+                deskripsi,
+                nama_file,
+                len(dataframe)
+            )
+        )
+
+        id_dataset = cursor.lastrowid
+
+        # Simpan seluruh data pasien
+        for _, row in dataframe.iterrows():
+
+            cursor.execute(
+                """
+                INSERT INTO data_pasien
+                (
+                    id_dataset,
+                    no_rekam_medis,
+                    jk,
+                    tgl_masuk,
+                    tgl_keluar,
+                    lama_rawat,
+                    kelas_rawatan,
+                    usia,
+                    cara_keluar,
+                    ruang_rawat,
+                    diagnosa_utama
+                )
+
+                VALUES
+                (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    id_dataset,
+                    str(row["No. Rekam Medis"]),
+                    row["JK"],
+                    str(row["TGL MSK"]),
+                    str(row["TGL KELUAR"]),
+                    int(row["LD"]),
+                    row["Kelas Rawatan"],
+                    int(row["Usia"]),
+                    row["Cara Keluar"],
+                    row["Ruang Rawat"],
+                    row["Diagnosa Utama"]
+                )
+            )
+
+        conn.commit()
+
+        return (
+            True,
+            id_dataset
+        )
+
+    except Exception as e:
+
+        conn.rollback()
+
+        return (
+            False,
+            str(e)
+        )
+
+    finally:
+
+        conn.close()
+
+
