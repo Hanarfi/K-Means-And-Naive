@@ -349,3 +349,92 @@ def simpan_dataset(
         conn.close()
 
 
+# ==========================================
+# SIMPAN DATA BOBOT
+# ==========================================
+
+def simpan_data_bobot(id_dataset, dataframe):
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    try:
+
+        conn.execute("BEGIN")
+
+        # Hapus data lama jika ada
+        cursor.execute(
+            """
+            DELETE FROM data_pasien_bobot
+            WHERE id_dataset = ?
+            """,
+            (id_dataset,)
+        )
+
+        # Ambil pasangan id_data sesuai urutan input
+        cursor.execute(
+            """
+            SELECT id_data
+            FROM data_pasien
+            WHERE id_dataset = ?
+            ORDER BY id_data
+            """,
+            (id_dataset,)
+        )
+
+        daftar_id = cursor.fetchall()
+
+        if len(daftar_id) != len(dataframe):
+            raise Exception(
+                "Jumlah data tidak sesuai."
+            )
+
+        for index, (_, row) in enumerate(dataframe.iterrows()):
+
+            id_data = daftar_id[index]["id_data"]
+
+            cursor.execute(
+                """
+                INSERT INTO data_pasien_bobot
+                (
+                    id_dataset,
+                    id_data,
+                    jk,
+                    lama_rawat,
+                    kelas_rawatan,
+                    usia,
+                    cara_keluar,
+                    ruang_rawat,
+                    diagnosa_utama
+                )
+
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    id_dataset,
+                    id_data,
+                    int(row["JK"]),
+                    int(row["LD"]),
+                    int(row["Kelas Rawatan"]),
+                    int(row["Usia"]),
+                    int(row["Cara Keluar"]),
+                    int(row["Ruang Rawat"]),
+                    int(row["Diagnosa Utama"])
+                )
+            )
+
+        conn.commit()
+
+        return True
+
+    except Exception as e:
+
+        conn.rollback()
+
+        raise e
+
+    finally:
+
+        conn.close()
+
+
