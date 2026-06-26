@@ -67,9 +67,6 @@ def validasi_kolom(df):
 
 def preview_dataset(df):
 
-    st.session_state.dataset_preview = df
-
-    st.session_state.nama_file = file.name
 
     st.subheader("Preview Dataset")
 
@@ -81,6 +78,11 @@ def preview_dataset(df):
     st.success(
         f"Jumlah data : {len(df)} pasien"
     )
+
+    st.session_state.dataset_preview = df
+
+    st.session_state.nama_file = file.name
+
 
 
 # ==========================================
