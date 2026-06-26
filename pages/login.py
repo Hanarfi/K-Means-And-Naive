@@ -1,7 +1,5 @@
-# pages/login.py
-
-import streamlit as st
 import hashlib
+import streamlit as st
 
 from database.koneksi import get_connection
 
@@ -18,10 +16,13 @@ def hash_password(password):
 
 
 # ==========================================
-# CEK LOGIN
+# AUTENTIKASI USER
 # ==========================================
 
-def login_user(username_email, password):
+def autentikasi_user(
+    username_email,
+    password
+):
 
     conn = get_connection()
 
@@ -31,65 +32,55 @@ def login_user(username_email, password):
         password
     )
 
-    cursor.execute("""
-        SELECT *
+    cursor.execute(
+        """
+        SELECT
+            id_pengguna,
+            nama_lengkap,
+            username,
+            email,
+            role,
+            status_akun
         FROM pengguna
-        WHERE (
-            username = ?
-            OR email = ?
+        WHERE
+            (
+                username = ?
+                OR email = ?
+            )
+            AND password_hash = ?
+        """,
+        (
+            username_email,
+            username_email,
+            password_hash
         )
-        AND password_hash = ?
-        AND status_akun = 'aktif'
-    """, (
-        username_email,
-        username_email,
-        password_hash
-    ))
+    )
 
     user = cursor.fetchone()
 
     conn.close()
 
-    return user
+    if user is None:
 
+        return (
+            False,
+            "Username atau password salah.",
+            None
+        )
 
-# ==========================================
-# SIMPAN SESSION
-# ==========================================
+    if user["status_akun"] != "aktif":
 
-def simpan_session(user):
+        return (
+            False,
+            "Akun tidak aktif.",
+            None
+        )
 
-    st.session_state["login"] = True
-
-    st.session_state["id_pengguna"] = (
-        user["id_pengguna"]
+    return (
+        True,
+        "Login berhasil.",
+        user
     )
-
-    st.session_state["nama_lengkap"] = (
-        user["nama_lengkap"]
-    )
-
-    st.session_state["username"] = (
-        user["username"]
-    )
-
-    st.session_state["role"] = (
-        user["role"]
-    )
-
-
-# ==========================================
-# LOGOUT
-# ==========================================
-
-def logout():
-
-    keys = list(
-        st.session_state.keys()
-    )
-
-    for key in keys:
-        del st.session_state[key]
 
 
 # ==========================================
@@ -98,21 +89,17 @@ def logout():
 
 def show():
 
-    st.divider()
-
-    if st.button("Belum punya akun? Daftar"):
-        st.session_state["halaman"] = "register"
-        st.rerun()
-
     st.title(
         "🔐 Login Sistem"
     )
 
     st.write(
-        "Masukkan username dan password."
+        "Masukkan username atau email dan password."
     )
 
-    with st.form("form_login"):
+    with st.form(
+        "form_login"
+    ):
 
         username_email = st.text_input(
             "Username atau Email"
@@ -123,16 +110,30 @@ def show():
             type="password"
         )
 
-        submit = st.form_submit_button(
+        login = st.form_submit_button(
             "Login"
         )
 
-    if submit:
+    col1, col2 = st.columns(2)
+
+    with col2:
+
+        if st.button(
+            "Belum punya akun?"
+        ):
+
+            st.session_state[
+                "auth_page"
+            ] = "register"
+
+            st.rerun()
+
+    if login:
 
         if not username_email:
 
             st.error(
-                "Username atau Email wajib diisi.."
+                "Username atau Email wajib diisi."
             )
 
             return
@@ -145,27 +146,34 @@ def show():
 
             return
 
-        user = login_user(
+        berhasil, pesan, user = autentikasi_user(
+
             username_email,
+
             password
+
         )
 
-        if user:
-
-            simpan_session(user)
-
-            st.success(
-                f"Selamat datang, {user['nama_lengkap']}"
-            )
-
-            st.rerun()
-
-        else:
+        if not berhasil:
 
             st.error(
-                "Username atau password salah."
+                pesan
             )
 
+            return
 
-if __name__ == "__main__":
-    show()
+        st.session_state["login"] = True
+
+        st.session_state["id_pengguna"] = user["id_pengguna"]
+
+        st.session_state["nama_lengkap"] = user["nama_lengkap"]
+
+        st.session_state["role"] = user["role"]
+
+        st.session_state["menu"] = "dashboard"
+
+        st.success(
+            "Login berhasil."
+        )
+
+        st.rerun()
