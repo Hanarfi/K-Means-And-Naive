@@ -1,22 +1,8 @@
 import streamlit as st
 import pandas as pd
 
-from models.auth import cek_login
+from models.auth import login_required
 
-
-# ==========================================
-# VALIDASI LOGIN
-# ==========================================
-
-def validasi_login():
-
-    if not cek_login():
-
-        st.warning(
-            "Silakan login terlebih dahulu."
-        )
-
-        st.stop()
 
 
 # ==========================================
@@ -43,7 +29,7 @@ def preview_dataset(df):
 
 def show():
 
-    validasi_login()
+    login_required()
 
     st.title("📂 Dataset Saya")
 
