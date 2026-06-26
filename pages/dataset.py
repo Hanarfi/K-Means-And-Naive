@@ -323,7 +323,7 @@ def show():
             status.write("Menyimpan dataset...")
     
             progress.progress(70)
-    
+            st.write("ID USER :", get_user_id())
             berhasil, hasil = simpan_dataset(
     
                 get_user_id(),
