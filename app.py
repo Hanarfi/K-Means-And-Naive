@@ -7,6 +7,9 @@ from pages.register import show as register_page
 from pages.dashboard import show as dashboard_page
 from pages.dataset import show as dataset_page
 from assets.load_css import load_css
+
+from models.auth import logout
+
 st.markdown(
     load_css(),
     unsafe_allow_html=True
@@ -16,19 +19,16 @@ st.markdown(
 if "login" not in st.session_state:
     st.session_state["login"] = False
 
-if "halaman" not in st.session_state:
-    st.session_state["halaman"] = "login"
+if "menu" not in st.session_state:
+    st.session_state["menu"] = "dashboard"
 
 
-# Sudah login
-if st.session_state["login"]:
-    dashboard_page()
+if not st.session_state["login"]:
 
-# Belum login
+    tampilkan_login()
+
 else:
 
-    if st.session_state["halaman"] == "login":
-        login_page()
+    tampilkan_sidebar()
 
-    elif st.session_state["halaman"] == "register":
-        register_page()
+    tampilkan_halaman()
