@@ -194,8 +194,13 @@ def tampil_daftar_dataset():
                     detail
                 )
 
+                tampil_preview_dataset(
+                    data["id_dataset"]
+                )
+
+            
+
                 # Tahap berikutnya
-                # tampil_preview_dataset(...)
                 # tampil_status_analisis(...)
                 # tampil_tombol_analisis(...)
 
@@ -320,6 +325,41 @@ def tampil_ringkasan_dataset(dataset):
             if dataset["deskripsi"]
             else "-"
         )
+
+# ==========================================
+# PREVIEW DATASET
+# ==========================================
+
+def tampil_preview_dataset(id_dataset):
+
+    st.divider()
+
+    st.subheader("📄 Preview Dataset")
+
+    data = preview_dataset(
+        id_dataset,
+        limit=10
+    )
+
+    if not data:
+
+        st.warning(
+            "Data pasien tidak ditemukan."
+        )
+
+        return
+
+    df = pd.DataFrame(data)
+
+    st.dataframe(
+        df,
+        use_container_width=True,
+        hide_index=True
+    )
+
+    st.caption(
+        f"Menampilkan {len(df)} data pertama."
+    )
 
 
 # ==========================================
