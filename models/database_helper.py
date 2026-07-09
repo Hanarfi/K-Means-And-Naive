@@ -747,28 +747,6 @@ def get_data_bobot(id_dataset):
     )
 
 
-# ==========================================
-# CEK DATASET
-# ==========================================
-
-def get_dataset_by_id(id_dataset):
-
-    return fetch_one(
-
-        """
-
-        SELECT *
-
-        FROM dataset
-
-        WHERE id_dataset = ?
-
-        """,
-
-        (id_dataset,)
-
-    )
-
 
 # ==========================================
 # HAPUS DATASET
@@ -800,7 +778,7 @@ def hapus_dataset(id_dataset):
 
         conn.commit()
 
-        return True
+        return True, None
 
     except Exception as e:
 
@@ -860,23 +838,7 @@ def preview_dataset(id_dataset, limit=10):
 
         """
 
-        SELECT
-
-            no_rekam_medis,
-
-            jk,
-
-            lama_rawat,
-
-            kelas_rawatan,
-
-            usia,
-
-            cara_keluar,
-
-            ruang_rawat,
-
-            diagnosa_utama
+        SELECT *
 
         FROM data_pasien
 
@@ -895,3 +857,53 @@ def preview_dataset(id_dataset, limit=10):
         )
 
     )
+
+
+# ==========================================
+# CEK HASIL KMEANS
+# ==========================================
+
+# def cek_hasil_kmeans(id_dataset):
+
+#     hasil = fetch_one(
+
+#         """
+
+#         SELECT COUNT(*)
+
+#         FROM hasil_kmeans
+
+#         WHERE id_dataset = ?
+
+#         """,
+
+#         (id_dataset,)
+
+#     )
+
+#     return hasil[0] > 0
+
+
+# ==========================================
+# CEK HASIL NAIVE BAYES
+# ==========================================
+
+# def cek_hasil_naive_bayes(id_dataset):
+
+#     hasil = fetch_one(
+
+#         """
+
+#         SELECT COUNT(*)
+
+#         FROM hasil_naive_bayes
+
+#         WHERE id_dataset = ?
+
+#         """,
+
+#         (id_dataset,)
+
+#     )
+
+#     return hasil[0] > 0
