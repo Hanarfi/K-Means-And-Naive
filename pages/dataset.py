@@ -119,7 +119,7 @@ def tampil_daftar_dataset():
         get_user_id()
     )
 
-    if len(daftar) == 0:
+    if not daftar:
 
         st.info(
             "Belum ada dataset yang tersimpan."
@@ -127,47 +127,55 @@ def tampil_daftar_dataset():
 
         return
 
-    # ======================================
-    # PERULANGAN DATASET
-    # ======================================
-
     for data in daftar:
 
         with st.container(border=True):
 
+            # ==================================
+            # HEADER
+            # ==================================
+
             st.markdown(
-                f"### 📁 {data['nama_dataset']}"
+                f"## 📁 {data['nama_dataset']}"
             )
+
+            if data["deskripsi"]:
+
+                st.caption(
+                    data["deskripsi"]
+                )
+
+            else:
+
+                st.caption(
+                    "Tidak ada deskripsi."
+                )
+
+            st.write(
+                f"**📄 File :** {data['nama_file']}"
+            )
+
+            st.divider()
+
+            # ==================================
+            # INFORMASI DATASET
+            # ==================================
 
             col1, col2 = st.columns(2)
 
             with col1:
 
-                st.write(
-                    f"**📄 File :** {data['nama_file']}"
-                )
-
-                st.write(
-                    f"**👥 Jumlah Data :** {data['jumlah_data']}"
+                st.metric(
+                    "👥 Jumlah Data",
+                    data["jumlah_data"]
                 )
 
             with col2:
 
-                st.write(
-                    f"**📅 Upload :** {data['tanggal_upload']}"
+                st.metric(
+                    "📅 Tanggal Upload",
+                    str(data["tanggal_upload"]).split()[0]
                 )
-
-                st.write(
-                    f"**📝 Deskripsi :**"
-                )
-
-                st.write(
-                    data["deskripsi"]
-                    if data["deskripsi"]
-                    else "-"
-                )
-
-            st.divider()
 
             # ==================================
             # DETAIL DATASET
@@ -186,41 +194,50 @@ def tampil_daftar_dataset():
                     detail
                 )
 
+                # Tahap berikutnya
+                # tampil_preview_dataset(...)
+                # tampil_status_analisis(...)
+                # tampil_tombol_analisis(...)
+
             st.divider()
 
             # ==================================
             # TOMBOL HAPUS
             # ==================================
 
-            berhasil_hapus = st.button(
-
-                "🗑 Hapus Dataset",
-
-                key=f"hapus_{data['id_dataset']}",
-
-                use_container_width=True
-
+            col1, col2, col3 = st.columns(
+                [1, 1, 4]
             )
 
-            if berhasil_hapus:
+            with col1:
 
-                sukses, pesan = hapus_dataset(
-                    data["id_dataset"]
-                )
+                if st.button(
 
-                if sukses:
+                    "🗑 Hapus",
 
-                    st.success(
-                        "Dataset berhasil dihapus."
+                    key=f"hapus_{data['id_dataset']}",
+
+                    use_container_width=True
+
+                ):
+
+                    sukses, pesan = hapus_dataset(
+                        data["id_dataset"]
                     )
 
-                    st.rerun()
+                    if sukses:
 
-                else:
+                        st.success(
+                            "Dataset berhasil dihapus."
+                        )
 
-                    st.error(
-                        pesan
-                    )
+                        st.rerun()
+
+                    else:
+
+                        st.error(
+                            pesan
+                        )
 
 
 
@@ -230,7 +247,9 @@ def tampil_daftar_dataset():
 
 def tampil_ringkasan_dataset(dataset):
 
-    st.subheader("📋 Informasi Dataset")
+    st.subheader(
+        "📋 Informasi Dataset"
+    )
 
     col1, col2 = st.columns(2)
 
@@ -249,14 +268,18 @@ def tampil_ringkasan_dataset(dataset):
 
         jumlah_kolom = 0
 
-        if len(data_pasien) > 0:
+        if data_pasien:
 
-            jumlah_kolom = len(data_pasien[0])
+            jumlah_kolom = len(
+                data_pasien[0]
+            )
 
         st.metric(
             "Jumlah Kolom",
             jumlah_kolom
         )
+
+    st.write("")
 
     col1, col2 = st.columns(2)
 
@@ -269,8 +292,6 @@ def tampil_ringkasan_dataset(dataset):
         st.write(
             dataset["nama_dataset"]
         )
-
-        st.write("")
 
         st.write(
             "**Nama File**"
@@ -289,8 +310,6 @@ def tampil_ringkasan_dataset(dataset):
         st.write(
             dataset["tanggal_upload"]
         )
-
-        st.write("")
 
         st.write(
             "**Deskripsi**"
