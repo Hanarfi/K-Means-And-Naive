@@ -21,6 +21,9 @@ from models.database_helper import (
     get_dataset_user,
     get_detail_dataset,
     get_data_pasien,
+    preview_dataset,
+    # cek_hasil_kmeans,
+    # cek_hasil_naive_bayes,
     hapus_dataset
 )
 
@@ -124,6 +127,10 @@ def tampil_daftar_dataset():
 
         return
 
+    # ======================================
+    # PERULANGAN DATASET
+    # ======================================
+
     for data in daftar:
 
         with st.container(border=True):
@@ -137,57 +144,163 @@ def tampil_daftar_dataset():
             with col1:
 
                 st.write(
-                    f"**Jumlah Data :** {data['jumlah_data']}"
+                    f"**📄 File :** {data['nama_file']}"
                 )
 
                 st.write(
-                    f"**File :** {data['nama_file']}"
+                    f"**👥 Jumlah Data :** {data['jumlah_data']}"
                 )
 
             with col2:
 
                 st.write(
-                    f"**Tanggal Upload :** {data['tanggal_upload']}"
+                    f"**📅 Upload :** {data['tanggal_upload']}"
                 )
 
-            col1, col2 = st.columns(2)
+                st.write(
+                    f"**📝 Deskripsi :**"
+                )
 
-            with col1:
+                st.write(
+                    data["deskripsi"]
+                    if data["deskripsi"]
+                    else "-"
+                )
 
-                if st.button(
+            st.divider()
 
-                    "📄 Detail",
+            # ==================================
+            # DETAIL DATASET
+            # ==================================
 
-                    key=f"detail_{data['id_dataset']}"
+            with st.expander(
+                "📄 Lihat Detail Dataset",
+                expanded=False
+            ):
 
-                ):
+                detail = get_detail_dataset(
+                    data["id_dataset"]
+                )
 
-                    st.session_state.dataset_detail = (
-                        data["id_dataset"]
+                tampil_ringkasan_dataset(
+                    detail
+                )
+
+            st.divider()
+
+            # ==================================
+            # TOMBOL HAPUS
+            # ==================================
+
+            berhasil_hapus = st.button(
+
+                "🗑 Hapus Dataset",
+
+                key=f"hapus_{data['id_dataset']}",
+
+                use_container_width=True
+
+            )
+
+            if berhasil_hapus:
+
+                sukses, pesan = hapus_dataset(
+                    data["id_dataset"]
+                )
+
+                if sukses:
+
+                    st.success(
+                        "Dataset berhasil dihapus."
                     )
 
-            with col2:
+                    st.rerun()
 
-                if st.button(
+                else:
 
-                    "🗑 Hapus",
-
-                    key=f"hapus_{data['id_dataset']}"
-
-                ):
-
-                    berhasil = hapus_dataset(
-                        data["id_dataset"]
+                    st.error(
+                        pesan
                     )
 
-                    if berhasil:
 
-                        st.success(
-                            "Dataset berhasil dihapus."
-                        )
 
-                        st.rerun()
+# ==========================================
+# RINGKASAN DATASET
+# ==========================================
 
+def tampil_ringkasan_dataset(dataset):
+
+    st.subheader("📋 Informasi Dataset")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+
+        st.metric(
+            "Jumlah Data",
+            dataset["jumlah_data"]
+        )
+
+    with col2:
+
+        data_pasien = get_data_pasien(
+            dataset["id_dataset"]
+        )
+
+        jumlah_kolom = 0
+
+        if len(data_pasien) > 0:
+
+            jumlah_kolom = len(data_pasien[0])
+
+        st.metric(
+            "Jumlah Kolom",
+            jumlah_kolom
+        )
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+
+        st.write(
+            "**Nama Dataset**"
+        )
+
+        st.write(
+            dataset["nama_dataset"]
+        )
+
+        st.write("")
+
+        st.write(
+            "**Nama File**"
+        )
+
+        st.write(
+            dataset["nama_file"]
+        )
+
+    with col2:
+
+        st.write(
+            "**Tanggal Upload**"
+        )
+
+        st.write(
+            dataset["tanggal_upload"]
+        )
+
+        st.write("")
+
+        st.write(
+            "**Deskripsi**"
+        )
+
+        st.write(
+            dataset["deskripsi"]
+            if dataset["deskripsi"]
+            else "-"
+        )
 
 
 # ==========================================
