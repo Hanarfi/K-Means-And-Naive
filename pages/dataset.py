@@ -41,6 +41,9 @@ def init_session():
 
     if "last_uploaded_file" not in st.session_state:
         st.session_state.last_uploaded_file = None
+    
+    if "dataset_detail" not in st.session_state:
+        st.session_state.dataset_detail = None
 
 
 
@@ -60,6 +63,8 @@ def reset_session():
     st.session_state.deskripsi_dataset = "" 
     
     st.session_state.last_uploaded_file = None
+    
+    st.session_state.dataset_detail = None
 
 
 
@@ -91,6 +96,94 @@ def preview_dataset(df):
         st.success(
             f"Jumlah Kolom : {len(df.columns)}"
         )
+
+
+# ==========================================
+# DAFTAR DATASET
+# ==========================================
+
+def tampil_daftar_dataset():
+
+    st.divider()
+
+    st.subheader("📚 Dataset Saya")
+
+    daftar = get_dataset_user(
+        get_user_id()
+    )
+
+    if len(daftar) == 0:
+
+        st.info(
+            "Belum ada dataset yang tersimpan."
+        )
+
+        return
+
+    for data in daftar:
+
+        with st.container(border=True):
+
+            st.markdown(
+                f"### 📁 {data['nama_dataset']}"
+            )
+
+            col1, col2 = st.columns(2)
+
+            with col1:
+
+                st.write(
+                    f"**Jumlah Data :** {data['jumlah_data']}"
+                )
+
+                st.write(
+                    f"**File :** {data['nama_file']}"
+                )
+
+            with col2:
+
+                st.write(
+                    f"**Tanggal Upload :** {data['tanggal_upload']}"
+                )
+
+            col1, col2 = st.columns(2)
+
+            with col1:
+
+                if st.button(
+
+                    "📄 Detail",
+
+                    key=f"detail_{data['id_dataset']}"
+
+                ):
+
+                    st.session_state.dataset_detail = (
+                        data["id_dataset"]
+                    )
+
+            with col2:
+
+                if st.button(
+
+                    "🗑 Hapus",
+
+                    key=f"hapus_{data['id_dataset']}"
+
+                ):
+
+                    berhasil = hapus_dataset(
+                        data["id_dataset"]
+                    )
+
+                    if berhasil:
+
+                        st.success(
+                            "Dataset berhasil dihapus."
+                        )
+
+                        st.rerun()
+
 
 
 # ==========================================
@@ -374,6 +467,8 @@ def show():
                 st.error(
                     hasil
                 )
+
+    tampil_daftar_dataset()
 
         
 
